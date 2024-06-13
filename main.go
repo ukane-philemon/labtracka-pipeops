@@ -41,7 +41,7 @@ func main() {
 		SMTPHost:     "smtp-relay.brevo.com",
 		SMTPPort:     587,
 		SMTPUsername: "labtracka@gmail.com",
-		SMTPPassword: "vAn03c2wjxb47PI8",
+		SMTPPassword: "", // Add when needed
 		SMTPFrom:     "labtracka@gmail.com",
 	}
 
