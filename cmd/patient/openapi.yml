@@ -1,0 +1,180 @@
+openapi: "3.0.2"
+info:
+  title: LabTracka User API
+  description: "TODO"
+  termsOfService: https://labtracka.com/terms-of-service
+  contact:
+    name: LabTracka
+    url: https://labtracka.com
+    email: labtracka@gmail.com
+  license:
+    name: "TODO"
+    url: https://api.server.test/v1/user/todo
+  version: "1.0.0"
+servers:
+  - url: https://{basePath}:{port}/{version}/user
+    description: "Production Server"
+    variables:
+      basePath:
+        default: "labtracka.com"
+        description: "The base path for the LabTracka User API"
+      port:
+        default: "6756"
+        description: "Production server port"
+      version:
+        enum:
+          - "v1"
+        default: "v1"
+        description: "This is the API version and is present in request URLs and is different from the API spec version."
+
+  - url: https://{basePath}:{port}/{version}/user
+    description: "Staging Server"
+    variables:
+      basePath:
+        default: "labtracka.com"
+        description: "The base path for the LabTracka User API."
+      port:
+        default: "6856"
+        description: "Staging server port"
+      version:
+        enum:
+          - "v1"
+        default: "v1"
+        description: "This is the API version and is present in request URLs and is different from the API spec version."
+paths:
+  /create-account:
+    get:
+      responses:
+        "200":
+          description: OK
+
+  /login:
+    post:
+      responses:
+        "200":
+          description: OK
+
+  /refresh-auth-token:
+    get:
+      responses:
+        "200":
+          description: OK
+
+  /otp:
+    post:
+      responses:
+        "200":
+          description: OK
+
+  /otp-validation:
+    post:
+      responses:
+        "200":
+          description: OK
+
+  /reset-password:
+    post:
+      responses:
+        "200":
+          description: OK
+
+  /change-password:
+    post:
+      responses:
+        "200":
+          description: OK
+
+  /labs:
+    get:
+      responses:
+        "200":
+          description: OK
+
+  /labs/{labID}/tests:
+    get:
+      responses:
+        "200":
+          description: OK
+
+  /orders:
+    get:
+      responses:
+        "200":
+          description: OK
+    post:
+      responses:
+        "200":
+          description: OK
+
+  /results:
+    get:
+      responses:
+        "200":
+          description: OK
+
+  /profile:
+    get:
+      responses:
+        "200":
+          description: OK
+
+    post:
+      responses:
+        "200":
+          description: OK
+
+  /faqs:
+    get:
+      responses:
+        "200":
+          description: OK
+  /profile-image:
+    post:
+      responses:
+        "200":
+          description: "Ok"
+  /sub-accounts:
+    post:
+      responses:
+        "200":
+          description: OK
+    get:
+      responses:
+        "200":
+          description: OK
+
+  /notifications:
+    get:
+      responses:
+        "200":
+          description: OK
+
+  /mark-notifications-as-read:
+    post:
+      responses:
+        "200":
+          description: OK
+components:
+  schemas:
+    APIResponse:
+      type: object
+      description: "This is the default response to all API requests and is returned as part of all API responses"
+      properties:
+        ok:
+          description: '"true" if the request was success full'
+          type: boolean
+        message:
+          description: ""
+    LoginRequest:
+      type: object
+
+  responses:
+    APIResponse:
+      description: "This is the default response to all API requests and is returned as part of all API responses"
+
+  requestBodies:
+    LoginRequest:
+      content:
+        "application/json":
+          schema:
+            $ref: "#"

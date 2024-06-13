@@ -1,0 +1,10 @@
+{{define "subject"}} LabTracka OTP {{end}}
+
+{{define "plainBody"}}
+An email OTP was requested for your email address, kindly ignore if you did not authenticate this request or do not have
+an account on labtracka.com
+
+OTP: {{.OTP}}
+Expires In: {{.Expiry}}
+
+{{end}}
