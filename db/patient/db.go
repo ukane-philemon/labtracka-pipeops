@@ -30,6 +30,7 @@ const (
 	lastLoginKey    = "last_login"
 	statusKey       = "status"
 	customerInfoKey = "customerinfo" // embedded
+	otherAddressKey = "other_address"
 
 	customerResultsKey = "customer_results"
 	customerIDKey      = "customer_id"
@@ -37,6 +38,7 @@ const (
 	// Special actions
 	greaterThan = "$gt"
 	equalTo     = "$eq"
+	setAction   = "$set"
 )
 
 // Check that MongoDB implements patient.Database.

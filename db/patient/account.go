@@ -85,7 +85,7 @@ func (m *MongoDB) AddNewAddress(email string, address *db.CustomerAddress) ([]*d
 	}
 
 	customer.OtherAddress = append(customer.OtherAddress, address)
-	_, err = accountsColl.UpdateOne(m.ctx, filter, customer)
+	_, err = accountsColl.UpdateByID(m.ctx, customer.ID, bson.M{setAction: bson.M{mapKey(customerInfoKey, otherAddressKey): customer.OtherAddress}})
 	if err != nil {
 		return nil, err
 	}

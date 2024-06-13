@@ -47,7 +47,7 @@ func (m *MongoDB) LoginCustomer(loginReq *db.LoginRequest) (*db.Customer, error)
 	if loginReq.DeviceID != customer.DeviceID {
 		if loginReq.SaveNewDeviceID {
 			_, err = session.WithTransaction(m.ctx, func(ctx mongo.SessionContext) (interface{}, error) {
-				return accountsColl.UpdateByID(ctx, customer.ID, bson.M{"$set": bson.M{deviceIDKey: loginReq.DeviceID}})
+				return accountsColl.UpdateByID(ctx, customer.ID, bson.M{setAction: bson.M{deviceIDKey: loginReq.DeviceID}})
 			})
 		} else {
 			err = fmt.Errorf("%w: otp validation is required for new device", db.ErrorOTPRequired)
@@ -60,7 +60,7 @@ func (m *MongoDB) LoginCustomer(loginReq *db.LoginRequest) (*db.Customer, error)
 	// Log the login ip address.
 	_, err = session.WithTransaction(m.ctx, func(ctx mongo.SessionContext) (interface{}, error) {
 		filter := bson.M{dbIDKey: customer.ID}
-		update := bson.M{"$set": bson.M{mapKey(lastLoginKey, loginReq.ClientIP): time.Now().Unix()}}
+		update := bson.M{setAction: bson.M{mapKey(lastLoginKey, loginReq.ClientIP): time.Now().Unix()}}
 		opts := options.FindOneAndUpdate().SetUpsert(true)
 		res := m.customer.Collection(loginRecordCollection).FindOneAndUpdate(ctx, filter, update, opts)
 		return res, res.Err()
@@ -101,29 +101,4 @@ func (m *MongoDB) Notifications(email string) ([]*db.Notification, error) {
 // as read.
 func (m *MongoDB) MarkNotificationsAsRead(email string, noteIDs ...string) error {
 	return nil
-}
-
-// Results returns all results for the customer with the specified email
-// address.
-func (m *MongoDB) Results(email string) ([]*db.LabResult, error) {
-	return nil, nil
-}
-
-// Faqs returns information about frequently asked questions and help links.
-func (m *MongoDB) Faqs() (*db.Faqs, error) {
-	return nil, nil
-}
-
-/**** Labs ****/
-
-// Labs returns a list of available labs.
-func (m *MongoDB) Labs() ([]*db.BasicLabInfo, error) {
-	return nil, nil
-}
-
-// LabTests returns a list of supported single lab tests and test packages
-// for the lab with the provided labID. Returns an ErrorInvalidRequest if
-// labID does not exist.
-func (m *MongoDB) LabTests(labID string) (*db.LabTests, error) {
-	return nil, nil
 }
