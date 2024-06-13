@@ -13,7 +13,10 @@ import (
 )
 
 func main() {
-	connectionURL := os.Args[1]
+	connectionURL := os.Args[0]
+	if len(os.Args) > 1 {
+		connectionURL = os.Args[1]
+	}
 	logger := slog.New(slog.Default().Handler())
 	logErrorAndExit := func(err error) {
 		trace := string(debug.Stack())
