@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
 	"log/slog"
 	"os"
@@ -13,10 +14,10 @@ import (
 )
 
 func main() {
-	connectionURL := os.Args[0]
-	if len(os.Args) > 1 {
-		connectionURL = os.Args[1]
-	}
+	var connectionURL string
+	flag.StringVar(&connectionURL, "dbURL", "", "Database connection URL")
+	flag.Parse()
+
 	logger := slog.New(slog.Default().Handler())
 	logErrorAndExit := func(err error) {
 		trace := string(debug.Stack())
