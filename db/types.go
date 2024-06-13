@@ -230,11 +230,17 @@ type Faqs struct {
 	HelpLinks []*HelpLink `json:"help_links" bson:"help_links"`
 }
 
+type OrderTest struct {
+	TestID  string  `json:"test_id"` // test ids, can be packages
+	Amount  float64 `json:"amount"`
+	LabName string  `json:"lab_name"`
+}
+
 type Order struct {
 	ID           string           `json:"id"`
 	Description  string           `json:"description"`
-	Amount       float64          `json:"amount"`
-	Tests        []string         `json:"tests"` // test ids, can be packages
+	TotalAmount  float64          `json:"total_amount" bson:"total_amount"`
+	Tests        []*OrderTest     `json:"tests"`
 	PatientID    string           `json:"patient_id" bson:"patient_id"`
 	SubAccountID string           `json:"sub_account_id" bson:"sub_account_id"`
 	Status       string           `json:"status"` // Pending/Paid
