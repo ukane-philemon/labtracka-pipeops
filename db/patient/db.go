@@ -7,7 +7,6 @@ import (
 	"log/slog"
 
 	"github.com/ukane-philemon/labtracka-api/cmd/patient"
-	"github.com/ukane-philemon/labtracka-api/db"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -50,7 +49,6 @@ type MongoDB struct {
 
 	client   *mongo.Client
 	customer *mongo.Database
-	admin    db.PatientAdminDatabase
 }
 
 // New creates and connects a new *MongoDB instance.

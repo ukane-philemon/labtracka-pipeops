@@ -1,1 +1,71 @@
-package patient
+package admin
+
+import (
+	"context"
+	"errors"
+	"fmt"
+	"log/slog"
+
+	"github.com/ukane-philemon/labtracka-api/cmd/patient"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo/readpref"
+)
+
+const (
+	adminDatabase = "admin"
+)
+
+var _ patient.AdminDatabase = (*MongoDB)(nil)
+
+// MongoDB implements the patient.AdminDatabase interface.
+type MongoDB struct {
+	ctx context.Context
+	log *slog.Logger
+
+	client *mongo.Client
+	admin  *mongo.Database
+}
+
+// New connects and creates a *MongoDB instance.
+func New(ctx context.Context, logger *slog.Logger, connectionURL string) (*MongoDB, error) {
+	if logger == nil || connectionURL == "" {
+		return nil, errors.New("missing required arguments")
+	}
+
+	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI(connectionURL).SetServerAPIOptions(serverAPI)
+
+	// Create a new client and connect to the server
+	client, err := mongo.Connect(ctx, opts)
+	if err != nil {
+		return nil, fmt.Errorf("mongo.Connect error: %w", err)
+	}
+
+	// Send a ping to confirm a successful connection
+	if err := client.Ping(ctx, readpref.Nearest()); err != nil {
+		return nil, fmt.Errorf("client.Ping error: %w", err)
+	}
+
+	m := &MongoDB{
+		ctx:    ctx,
+		client: client,
+		admin:  client.Database(adminDatabase),
+		log:    logger,
+	}
+
+	// Create unique indexes.
+	// accountUniqueIndex := true
+	// TODO: Create indexes.
+	// m.admin.Collection(accountCollection).Indexes().CreateOne(m.ctx, mongo.IndexModel{
+	// 	Keys: bson.D{{Key: emailKey, Value: 1}, {Key: idKey, Value: 1}},
+	// 	Options: &options.IndexOptions{
+	// 		Unique: &accountUniqueIndex,
+	// 	},
+	// })
+	// TODO: Create indexes for other collections.
+
+	m.log.Info("Customer database connected successfully!")
+
+	return m, nil
+}
