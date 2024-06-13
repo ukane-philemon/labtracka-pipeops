@@ -42,8 +42,7 @@ func (s *Server) registerRoutes() http.Handler {
 		withAuth.Post("/change-password", s.handleChangePassword)
 
 		/**** Profile ****/
-		withAuth.Post("/profile", nil)       // TODO:
-		withAuth.Get("/profile", nil)        // TODO:
+		withAuth.Get("/profile", s.handleGetProfile)
 		withAuth.Post("/profile-image", nil) // TODO:
 		withAuth.Get("/profile-image", nil)  // TODO:
 		withAuth.Post("/sub-account", s.handleAddSubAccount)

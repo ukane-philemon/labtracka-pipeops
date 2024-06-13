@@ -49,6 +49,11 @@ func (m *MongoDB) CreateAccount(req *db.CreateAccountRequest) error {
 	return nil
 }
 
+// PatientInfo returns the information of the patient with the provided email.
+func (m *MongoDB) PatientInfo(email string) (*db.Customer, error) {
+	return nil, nil
+}
+
 // AddSubAccount adds a new sub account to a patient's profile.
 func (m *MongoDB) AddSubAccount(email string, account *db.SubAccount) ([]*db.SubAccountInfo, error) {
 	return nil, nil

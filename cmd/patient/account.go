@@ -70,6 +70,24 @@ func (s *Server) handleCreateAccount(res http.ResponseWriter, req *http.Request)
 	s.sendSuccessResponse(res, req, "Account created successfully, please proceed to login")
 }
 
+// handleGetProfile handles the "GET /profile" endpoint and returns patient
+// information.
+func (s *Server) handleGetProfile(res http.ResponseWriter, req *http.Request) {
+	authID := s.reqAuthID(req)
+	if authID == "" {
+		s.authenticationRequired(res, req)
+		return
+	}
+
+	patientInfo, err := s.db.PatientInfo(authID)
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("db.PatientInfo error: %w", err))
+		return
+	}
+
+	s.sendSuccessResponseWithData(res, req, patientInfo)
+}
+
 func trimErrorInvalidRequest(err error) string {
 	return strings.TrimPrefix(err.Error(), db.ErrorInvalidRequest.Error()+": ")
 }

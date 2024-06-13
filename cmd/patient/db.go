@@ -11,6 +11,9 @@ type Database interface {
 	// the database. Returns an ErrorInvalidRequest if user email is already
 	// tied to another customer.
 	CreateAccount(req *db.CreateAccountRequest) error
+	// PatientInfo returns the information of the patient with the provided
+	// email.
+	PatientInfo(email string) (*db.Customer, error)
 	// LoginCustomer logs a customer into their account. Returns an
 	// ErrorInvalidRequest is user email or password is invalid/not correct or
 	// does not exist or an ErrorOTPRequired if otp validation is required for
