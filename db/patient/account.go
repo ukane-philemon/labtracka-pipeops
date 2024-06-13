@@ -1,10 +1,12 @@
 package patient
 
 import (
+	"errors"
 	"fmt"
 	"time"
 
 	"github.com/ukane-philemon/labtracka-api/db"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"golang.org/x/crypto/bcrypt"
 )
@@ -67,5 +69,26 @@ func (m *MongoDB) RemoveSubAccount(email, subAccountID string) ([]*db.SubAccount
 
 // AddNewAddress adds a new address to a patient's profile.
 func (m *MongoDB) AddNewAddress(email string, address *db.CustomerAddress) ([]*db.CustomerAddress, error) {
-	return nil, nil
+	if err := address.Validate(); err != nil {
+		return nil, fmt.Errorf("%w: %v", db.ErrorInvalidRequest, err)
+	}
+
+	var customer *dbCustomer
+	filter := bson.M{mapKey(customerInfoKey, emailKey): email}
+	accountsColl := m.customer.Collection(accountCollection)
+	err := accountsColl.FindOne(m.ctx, filter).Decode(&customer)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return nil, fmt.Errorf("account (%s) not found", email)
+		}
+		return nil, err
+	}
+
+	customer.OtherAddress = append(customer.OtherAddress, address)
+	_, err = accountsColl.UpdateOne(m.ctx, filter, customer)
+	if err != nil {
+		return nil, err
+	}
+
+	return customer.OtherAddress, nil
 }
