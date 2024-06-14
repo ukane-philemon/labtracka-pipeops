@@ -11,6 +11,9 @@ type Database interface {
 	// AdminLabs returns a list of labs added to the db for only super admin.
 	// The provided email must match a super admin.
 	AdminLabs(email string) ([]*db.AdminLabInfo, error)
+	// MarkNotificationsAsRead marks the notifications with the provided noteIDs
+	// as read.
+	MarkNotificationsAsRead(email string, noteIDs ...string) error
 	Shutdown()
 }
 
