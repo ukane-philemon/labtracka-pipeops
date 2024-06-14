@@ -1,4 +1,4 @@
-package patient
+package admin
 
 import (
 	"context"
@@ -35,13 +35,13 @@ const (
 type Server struct {
 	cfg *Config
 
-	ctx     context.Context
-	db      Database
-	adminDB AdminDatabase
-	baseURL string
-	mailer  *smtp.Mailer
-	logger  *slog.Logger
-	wg      sync.WaitGroup
+	ctx       context.Context
+	db        Database
+	patientDB PatientDatabase
+	baseURL   string
+	mailer    *smtp.Mailer
+	logger    *slog.Logger
+	wg        sync.WaitGroup
 
 	optManager *otp.Manager
 	jwtManager *jwt.Manager
@@ -49,7 +49,7 @@ type Server struct {
 	paystack paystack.Client
 }
 
-func NewServer(patientDB Database, adminDB AdminDatabase, cfg *Config) (*Server, error) {
+func NewServer(adminDB Database, patientDB PatientDatabase, cfg *Config) (*Server, error) {
 	err := cfg.Validate()
 	if err != nil {
 		return nil, err
@@ -57,8 +57,8 @@ func NewServer(patientDB Database, adminDB AdminDatabase, cfg *Config) (*Server,
 
 	s := &Server{
 		cfg:        cfg,
-		db:         patientDB,
-		adminDB:    adminDB,
+		db:         adminDB,
+		patientDB:  patientDB,
 		optManager: otp.NewManager(cfg.DevMode),
 		logger:     slog.New(tint.NewHandler(os.Stdout, &tint.Options{Level: slog.LevelDebug})),
 	}
@@ -136,11 +136,9 @@ func (s *Server) Run() {
 	s.wg.Wait()
 }
 
-func (s *Server) reqAuthID(req *http.Request) string {
-	emailCtxValue := req.Context().Value(customerEmailCtx)
-	if emailCtxValue != nil {
-		return emailCtxValue.(string)
-	}
+func (s *Server) reqAuthID(_ *http.Request) string {
+	// TODO: Check that this user is logged in and the auth token is still valid
+	// and return the auth ID.
 	return ""
 }
 

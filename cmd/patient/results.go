@@ -14,7 +14,7 @@ func (s *Server) handleGetResults(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	results, err := s.admindb.Results(authID)
+	results, err := s.adminDB.Results(authID)
 	if err != nil {
 		s.serverError(res, req, fmt.Errorf("admindb.Results error: %w", err))
 		return

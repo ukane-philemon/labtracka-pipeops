@@ -164,12 +164,12 @@ func (s *Server) handleLogin(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	labsAvailable, err := s.admindb.Labs()
+	labsAvailable, err := s.adminDB.Labs()
 	if err != nil {
 		s.logger.Error("admindb.Labs error: %v", err)
 	}
 
-	patientStats, err := s.admindb.PatientLabStats(patientInfo.ID)
+	patientStats, err := s.adminDB.PatientLabStats(patientInfo.ID)
 	if err != nil {
 		s.logger.Error("admindb.Labs error: %v", err)
 	}

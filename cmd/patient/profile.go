@@ -8,7 +8,7 @@ import (
 // handleGetFaqs handles the "GET /faqs" endpoint and returns frequently asked
 // questions from the db.
 func (s *Server) handleGetFaqs(res http.ResponseWriter, req *http.Request) {
-	faqs, err := s.admindb.Faqs()
+	faqs, err := s.adminDB.Faqs()
 	if err != nil {
 		s.serverError(res, req, fmt.Errorf("admindb.Faqs error: %w", err))
 		return

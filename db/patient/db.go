@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/ukane-philemon/labtracka-api/cmd/patient"
+	patientapi "github.com/ukane-philemon/labtracka-api/cmd/patient"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -14,7 +14,8 @@ import (
 )
 
 const (
-	customerDatabase = "customer"
+	customerDatabaseDev  = "customer-dev"
+	customerDatabaseProd = "customer-prod"
 
 	/**** Customer Collections ****/
 
@@ -41,8 +42,8 @@ const (
 	setAction   = "$set"
 )
 
-// Check that MongoDB implements patient.Database.
-var _ patient.Database = (*MongoDB)(nil)
+// Check that MongoDB implements patientapi.Database.
+var _ patientapi.Database = (*MongoDB)(nil)
 
 // MongoDB implements patient.Database.
 type MongoDB struct {
@@ -54,7 +55,7 @@ type MongoDB struct {
 }
 
 // New creates and connects a new *MongoDB instance.
-func New(ctx context.Context, logger *slog.Logger, connectionURL string) (*MongoDB, error) {
+func New(ctx context.Context, devMode bool, logger *slog.Logger, connectionURL string) (*MongoDB, error) {
 	if logger == nil || connectionURL == "" {
 		return nil, errors.New("missing required arguments")
 	}
@@ -73,10 +74,15 @@ func New(ctx context.Context, logger *slog.Logger, connectionURL string) (*Mongo
 		return nil, fmt.Errorf("client.Ping error: %w", err)
 	}
 
+	customerDB := customerDatabaseDev
+	if !devMode {
+		customerDB = customerDatabaseProd
+	}
+
 	m := &MongoDB{
 		ctx:      ctx,
 		client:   client,
-		customer: client.Database(customerDatabase),
+		customer: client.Database(customerDB),
 		log:      logger,
 	}
 

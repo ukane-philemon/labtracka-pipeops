@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 
+	"github.com/ukane-philemon/labtracka-api/cmd/admin"
 	"github.com/ukane-philemon/labtracka-api/cmd/patient"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -13,12 +14,15 @@ import (
 )
 
 const (
-	adminDatabase = "admin"
+	adminDatabaseDev  = "admin-dev"
+	adminDatabaseProd = "admin-prod"
 )
 
+var _ admin.Database = (*MongoDB)(nil)
 var _ patient.AdminDatabase = (*MongoDB)(nil)
 
-// MongoDB implements the patient.AdminDatabase interface.
+// MongoDB implements the adminapi.Database and patientapi.AdminDatabase
+// interface.
 type MongoDB struct {
 	ctx context.Context
 	log *slog.Logger
@@ -28,7 +32,7 @@ type MongoDB struct {
 }
 
 // New connects and creates a *MongoDB instance.
-func New(ctx context.Context, logger *slog.Logger, connectionURL string) (*MongoDB, error) {
+func New(ctx context.Context, devMode bool, logger *slog.Logger, connectionURL string) (*MongoDB, error) {
 	if logger == nil || connectionURL == "" {
 		return nil, errors.New("missing required arguments")
 	}
@@ -47,6 +51,10 @@ func New(ctx context.Context, logger *slog.Logger, connectionURL string) (*Mongo
 		return nil, fmt.Errorf("client.Ping error: %w", err)
 	}
 
+	adminDatabase := adminDatabaseDev
+	if !devMode {
+		adminDatabase = adminDatabaseProd
+	}
 	m := &MongoDB{
 		ctx:    ctx,
 		client: client,
@@ -68,4 +76,11 @@ func New(ctx context.Context, logger *slog.Logger, connectionURL string) (*Mongo
 	m.log.Info("Customer database connected successfully!")
 
 	return m, nil
+}
+
+// Shutdown ends the database connection.
+func (m *MongoDB) Shutdown() {
+	if err := m.client.Disconnect(m.ctx); err != nil {
+		m.log.Error("User database failed to disconnect: %v", err)
+	}
 }

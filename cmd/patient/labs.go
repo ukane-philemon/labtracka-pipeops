@@ -12,7 +12,7 @@ import (
 // handleGetLabs handles the "GET /labs" endpoint and returns a list of
 // supported labs.
 func (s *Server) handleGetLabs(res http.ResponseWriter, req *http.Request) {
-	labs, err := s.admindb.Labs()
+	labs, err := s.adminDB.Labs()
 	if err != nil {
 		s.serverError(res, req, fmt.Errorf("db.Labs error: %w", err))
 		return
@@ -25,7 +25,7 @@ func (s *Server) handleGetLabs(res http.ResponseWriter, req *http.Request) {
 // test packages available for lab with the url param labID.
 func (s *Server) handleGetLabTests(res http.ResponseWriter, req *http.Request) {
 	labID := chi.URLParam(req, "labID")
-	labTests, err := s.admindb.LabTests(labID)
+	labTests, err := s.adminDB.LabTests(labID)
 	if err != nil {
 		if errors.Is(err, db.ErrorInvalidRequest) {
 			s.badRequest(res, req, trimErrorInvalidRequest(err))
