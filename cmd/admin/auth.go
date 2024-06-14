@@ -1,9 +1,12 @@
 package admin
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
+	"github.com/ukane-philemon/labtracka-api/db"
+	"github.com/ukane-philemon/labtracka-api/internal/jwt"
 	"github.com/ukane-philemon/labtracka-api/internal/otp"
 	"github.com/ukane-philemon/labtracka-api/internal/request"
 	"github.com/ukane-philemon/labtracka-api/internal/validator"
@@ -84,4 +87,89 @@ func (s *Server) handleOTPValidation(res http.ResponseWriter, req *http.Request)
 		"validation_token": validationToken,
 		"message":          "OTP validated successfully",
 	})
+}
+
+// handleLogin handles the "POST /login" endpoint and log a user with correct
+// details into their account.
+func (s *Server) handleLogin(res http.ResponseWriter, req *http.Request) {
+	var reqBody *loginRequest
+	err := request.DecodeJSONStrict(res, req, &reqBody)
+	if err != nil {
+		s.badRequest(res, req, "invalid request body")
+		return
+	}
+
+	if validator.AnyValueEmpty(reqBody.DeviceID, reqBody.Email, reqBody.Password) {
+		s.badRequest(res, req, "missing required field(s)")
+		return
+	}
+
+	if !validator.IsEmail(reqBody.Email) || !validator.IsPasswordValid(reqBody.Password) {
+		s.badRequest(res, req, "invalid email or password")
+		return
+	}
+
+	var saveNewDeviceID bool
+	if reqBody.EmailValidationToken != "" {
+		if isValid := s.optManager.ValidateOTPValidationToken(reqBody.DeviceID, reqBody.EmailValidationToken, reqBody.Email); !isValid {
+			s.badRequest(res, req, "invalid OTP")
+			return
+		}
+		saveNewDeviceID = true
+	}
+
+	loginReq := &db.LoginRequest{
+		Email:             reqBody.Email,
+		Password:          reqBody.Password,
+		ClientIP:          clientIP(req),
+		DeviceID:          reqBody.DeviceID,
+		SaveNewDeviceID:   saveNewDeviceID,
+		NotificationToken: reqBody.NotificationToken,
+	}
+
+	adminInfo, err := s.db.LoginAdmin(loginReq)
+	if err != nil {
+		if errors.Is(err, db.ErrorInvalidRequest) {
+			s.badRequest(res, req, "incorrect email or password")
+		} else if errors.Is(err, db.ErrorOTPRequired) {
+			s.badRequest(res, req, "otp required")
+		} else {
+			s.serverError(res, req, fmt.Errorf("db.LoginAdmin: %w", err))
+		}
+		return
+	}
+
+	if saveNewDeviceID {
+		s.optManager.DeleteOTPRecord(loginReq.ClientIP)
+	}
+
+	accessToken, err := s.jwtManager.GenerateJWtToken(reqBody.Email)
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("jwtManager.GenerateJWtToken: %w", err))
+		return
+	}
+
+	resp := &loginResponse{
+		Admin: adminInfo,
+		Auth: &authResponse{
+			AccessToken:     accessToken,
+			ExpiryInSeconds: uint64(jwt.JWTExpiry.Seconds()),
+		},
+	}
+
+	if adminInfo.ServerAdmin || len(adminInfo.LabIDs) > 0 {
+		resp.AdminStats, err = s.patientDB.AdminStats(adminInfo.LabIDs...)
+		if err != nil {
+			s.logger.Error("patientDB.AdminStats error: %v", err)
+		}
+	}
+
+	if adminInfo.ServerAdmin || adminInfo.SuperAdmin {
+		resp.AdminLabs, err = s.db.AdminLabs(adminInfo.Email)
+		if err != nil {
+			s.logger.Error("db.AdminLabs error: %v", err)
+		}
+	}
+
+	s.sendSuccessResponseWithData(res, req, resp)
 }

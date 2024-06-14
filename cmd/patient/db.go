@@ -36,7 +36,7 @@ type Database interface {
 	// subAccountID does not exist.
 	RemoveSubAccount(email, subAccountID string) ([]*db.SubAccountInfo, error)
 	// AddNewAddress adds a new address to a patient's profile.
-	AddNewAddress(email string, address *db.PatientAddress) ([]*db.PatientAddress, error)
+	AddNewAddress(email string, address *db.Address) ([]*db.Address, error)
 	// PatientOrders returns a list of orders made by the patient with the
 	// provided email.
 	PatientOrders(email string) ([]*db.Order, error)

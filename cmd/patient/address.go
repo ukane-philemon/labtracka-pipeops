@@ -16,7 +16,7 @@ func (s *Server) handleAddAddress(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var reqBody *db.PatientAddress
+	var reqBody *db.Address
 	err := request.DecodeJSON(res, req, &reqBody)
 	if err != nil {
 		s.badRequest(res, req, "invalid request body")

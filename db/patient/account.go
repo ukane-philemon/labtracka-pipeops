@@ -73,7 +73,7 @@ func (m *MongoDB) RemoveSubAccount(email, subAccountID string) ([]*db.SubAccount
 }
 
 // AddNewAddress adds a new address to a patient's profile.
-func (m *MongoDB) AddNewAddress(email string, address *db.PatientAddress) ([]*db.PatientAddress, error) {
+func (m *MongoDB) AddNewAddress(email string, address *db.Address) ([]*db.Address, error) {
 	if err := address.Validate(); err != nil {
 		return nil, fmt.Errorf("%w: %v", db.ErrorInvalidRequest, err)
 	}

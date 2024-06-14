@@ -14,13 +14,13 @@ import (
 
 // PatientInfo is information about a patient.
 type PatientInfo struct {
-	Name         string            `json:"name"`
-	Email        string            `json:"email"`
-	PhoneNumber  string            `json:"phone_number" bson:"phone_number"` // optional
-	DateOfBirth  time.Time         `json:"date_of_birth" bson:"date_of_birth"`
-	Address      *PatientAddress   `json:"patient_address" bson:"patient_address"`
-	OtherAddress []*PatientAddress `json:"other_address" bson:"other_address"`
-	Gender       string            `json:"gender"`
+	Name         string     `json:"name"`
+	Email        string     `json:"email"`
+	PhoneNumber  string     `json:"phone_number" bson:"phone_number"` // optional
+	DateOfBirth  time.Time  `json:"date_of_birth" bson:"date_of_birth"`
+	Address      *Address   `json:"patient_address" bson:"patient_address"`
+	OtherAddress []*Address `json:"other_address" bson:"other_address"`
+	Gender       string     `json:"gender"`
 }
 
 func (p *PatientInfo) Validate() error {
@@ -50,7 +50,7 @@ func (p *PatientInfo) Validate() error {
 	return nil
 }
 
-type PatientAddress struct {
+type Address struct {
 	Coordinates string `json:"coordinates"`
 	HouseNumber string `json:"house_number" bson:"house_number"`
 	StreetName  string `json:"street_name" bson:"street_name"`
@@ -58,12 +58,12 @@ type PatientAddress struct {
 	Country     string `json:"country"`
 }
 
-func (pa *PatientAddress) Validate() error {
+func (a *Address) Validate() error {
 	v := new(validator.Validator)
-	v.Check(pa.HouseNumber != "", "house number is required")
-	v.Check(pa.StreetName != "", "street name is required")
-	v.Check(pa.City != "", "city is required")
-	v.Check(pa.Country != "", `country is required`)
+	v.Check(a.HouseNumber != "", "house number is required")
+	v.Check(a.StreetName != "", "street name is required")
+	v.Check(a.City != "", "city is required")
+	v.Check(a.Country != "", `country is required`)
 
 	if v.HasErrors() {
 		return errors.New(strings.Join(v.Errors, ", "))
@@ -91,6 +91,13 @@ type CreateAccountRequest struct {
 type PatientStats struct {
 	TotalNumberOfLabsVisited     int64 `json:"total_number_of_labs_visited"`
 	TotalNumberOfCompletedOrders int64 `json:"total_number_of_completed_orders"`
+}
+
+type AdminStats struct {
+	TotalUsers         int64 `json:"total_users"`
+	TotalRevenue       int64 `json:"total_revenue"`
+	TotalTestOrders    int64 `json:"total_test_orders"`
+	TotalPendingOrders int64 `json:"total_pending_orders"`
 }
 
 type SubAccountInfo struct {
@@ -137,11 +144,17 @@ type LoginRequest struct {
 
 // BasicLabInfo is basic information about a laboratory.
 type BasicLabInfo struct {
-	ID       string `json:"id"`
-	Name     string `json:"name"`
-	LogoURL  string `json:"logo_url" bson:"logo_url"`
-	Address  string `json:"address"`
-	Featured bool   `json:"featured"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	LogoURL  string  `json:"logo_url" bson:"logo_url"`
+	Address  Address `json:"address"`
+	Featured bool    `json:"featured"`
+}
+
+type AdminLabInfo struct {
+	BasicLabInfo
+	CreatedAt     int64 `json:"created_at"`
+	LastUpdatedAt int64 `json:"last_updated_at"`
 }
 
 // LabTests is information about tests offered by a laboratory.
@@ -237,22 +250,22 @@ type OrderTest struct {
 }
 
 type Order struct {
-	ID           string          `json:"id"`
-	Description  string          `json:"description"`
-	TotalAmount  float64         `json:"total_amount" bson:"total_amount"`
-	Tests        []*OrderTest    `json:"tests"`
-	PatientID    string          `json:"patient_id" bson:"patient_id"`
-	SubAccountID string          `json:"sub_account_id" bson:"sub_account_id"`
-	Status       string          `json:"status"` // Pending/Paid
-	Address      *PatientAddress `json:"patient_address" bson:"patient_address"`
-	Timestamp    int64           `json:"timestamp"`
+	ID           string       `json:"id"`
+	Description  string       `json:"description"`
+	TotalAmount  float64      `json:"total_amount" bson:"total_amount"`
+	Tests        []*OrderTest `json:"tests"`
+	PatientID    string       `json:"patient_id" bson:"patient_id"`
+	SubAccountID string       `json:"sub_account_id" bson:"sub_account_id"`
+	Status       string       `json:"status"` // Pending/Paid
+	Address      *Address     `json:"patient_address" bson:"patient_address"`
+	Timestamp    int64        `json:"timestamp"`
 }
 
 type CreateOrderRequest struct {
-	Tests          []string        `json:"tests"` // test ids, can be packages
-	PatientID      string          `json:"patient_id" bson:"patient_id"`
-	SubAccountID   string          `json:"sub_account_id" bson:"sub_account_id"`
-	PatientAddress *PatientAddress `json:"patient_address" bson:"patient_address"`
+	Tests          []string `json:"tests"` // test ids, can be packages
+	PatientID      string   `json:"patient_id" bson:"patient_id"`
+	SubAccountID   string   `json:"sub_account_id" bson:"sub_account_id"`
+	PatientAddress *Address `json:"patient_address" bson:"patient_address"`
 }
 
 // BankCard holds information about a bank card.
@@ -271,4 +284,20 @@ type BankCard struct {
 	Disabled        bool       `json:"disabled"`
 	// Error will be empty if this card is valid.
 	Error string `json:"error"`
+}
+
+type Admin struct {
+	ID              string `json:"id"`
+	ProfileImageURL string `json:"profile_image" bson:"profile_image"`
+	AdminInfo
+	SuperAdmin  bool     `json:"super_admin"`
+	ServerAdmin bool     `json:"server_admin"`
+	LabIDs      []string `json:"lab_ids"`
+}
+
+type AdminInfo struct {
+	FirstName   string `json:"first_name"`
+	LastName    string `json:"last_name"`
+	Email       string `json:"email"`
+	PhoneNumber string `json:"phone_number" bson:"phone_number"` // optional
 }
