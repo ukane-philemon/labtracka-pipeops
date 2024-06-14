@@ -15,13 +15,75 @@ func (s *Server) registerRoutes() http.Handler {
 
 	cors := cors.New(cors.Options{
 		AllowedOrigins: []string{"*"},
-		AllowedMethods: []string{"POST", "GET", "DELETE"},
+		AllowedMethods: []string{"POST", "GET", "DELETE", "PATCH"},
 		Debug:          true,
 	})
 	mux.Use(cors.Handler)
 	mux.Use(httprate.LimitByRealIP(20, time.Minute))
 
 	mux.Get("/", s.root)
+
+	/*** Authentication ***/
+	mux.Post("/otp", s.handleSendOTP)
+	mux.Post("/otp-validation", nil)
+	mux.Post("/login", nil)
+	mux.Post("/reset-password", nil)
+	// mux.Post("/validate-public-key", s.handlePublicKeyValidation)
+
+	/**** Account ****/
+	mux.Post("/create-account", nil)
+
+	mux.Group(func(withAuth chi.Router) {
+		// Authentication is required for these routes.
+		withAuth.Use(nil)
+
+		/**** Authentication ****/
+		withAuth.Get("/refresh-auth-token", nil)
+		withAuth.Post("/change-password", nil)
+
+		/**** Dashboard & Profile ****/
+		withAuth.Get("/dashboard", nil)
+		withAuth.Get("/profile", nil)
+		withAuth.Patch("/profile", nil)
+		withAuth.Post("/profile-image", nil) // TODO:
+		withAuth.Get("/profile-image", nil)  // TODO:
+
+		/**** ADMIN ****/
+		withAuth.Get("/admins", nil)
+		withAuth.Post("/admin", nil)
+		withAuth.Patch("/admin", nil)
+		withAuth.Delete("/admin", nil)
+
+		/**** Payments ****/
+		withAuth.Get("/payments", nil)
+		withAuth.Post("/request-payment", nil)
+		withAuth.Post("/payment-approval", nil)
+
+		/**** Labs ****/
+		withAuth.Get("/labs", nil)
+		withAuth.Post("/lab", nil)
+		withAuth.Patch("/lab", nil)
+
+		/**** Tests ****/
+		withAuth.Get("/tests", nil)
+		withAuth.Post("/test", nil)
+		withAuth.Patch("/test", nil)
+
+		/**** Orders ****/
+		withAuth.Get("/orders", nil)
+
+		/**** Results ****/
+		withAuth.Get("/results", nil)
+		withAuth.Post("/upload-result", nil)
+
+		/**** Notifications ****/
+		withAuth.Get("/notifications", nil)
+		withAuth.Post("/mark-notifications-as-read", nil)
+
+		/**** Miscellaneous ****/
+		withAuth.Get("/faqs", nil)
+		withAuth.Post("/faqs", nil)
+	})
 
 	return mux
 }
