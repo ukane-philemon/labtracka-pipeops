@@ -7,12 +7,15 @@ import (
 	"log/slog"
 	"os"
 	"runtime/debug"
+	"sync"
 
 	adminapi "github.com/ukane-philemon/labtracka-api/cmd/admin"
 	patientapi "github.com/ukane-philemon/labtracka-api/cmd/patient"
 	admindb "github.com/ukane-philemon/labtracka-api/db/admin"
 	patientdb "github.com/ukane-philemon/labtracka-api/db/patient"
 )
+
+var wg sync.WaitGroup
 
 func main() {
 	var connectionURL string
@@ -41,7 +44,8 @@ func main() {
 		logErrorAndExit(err)
 	}
 
-	if !adminServer {
+	wg.Add(1)
+	go func() {
 		logger.Info("Attempting to start patient server...")
 		startPatientServer(patientDB, adminDB, &patientapi.Config{
 			DevMode:      devMode,
@@ -54,21 +58,27 @@ func main() {
 			SMTPPassword: "", // Add when needed
 			SMTPFrom:     "labtracka@gmail.com",
 		})
-	} else {
-		logger.Info("Attempting to start admin server...")
-		startAdminServer(patientDB, adminDB, &adminapi.Config{
-			DevMode:      devMode,
-			ServerHost:   "localhost",
-			ServerPort:   "8081",
-			ServerEmail:  "ukanephilemon@gmail.com",
-			SMTPHost:     "smtp-relay.brevo.com",
-			SMTPPort:     587,
-			SMTPUsername: "labtracka@gmail.com",
-			SMTPPassword: "", // Add when needed
-			SMTPFrom:     "labtracka@gmail.com",
-		})
+	}()
 
+	if adminServer {
+		wg.Add(1)
+		go func() {
+			logger.Info("Attempting to start admin server...")
+			startAdminServer(patientDB, adminDB, &adminapi.Config{
+				DevMode:      devMode,
+				ServerHost:   "localhost",
+				ServerPort:   "8081",
+				ServerEmail:  "ukanephilemon@gmail.com",
+				SMTPHost:     "smtp-relay.brevo.com",
+				SMTPPort:     587,
+				SMTPUsername: "labtracka@gmail.com",
+				SMTPPassword: "", // Add when needed
+				SMTPFrom:     "labtracka@gmail.com",
+			})
+		}()
 	}
+
+	wg.Wait()
 }
 
 func startAdminServer(patientDB *patientdb.MongoDB, adminDB *admindb.MongoDB, cfg *adminapi.Config) {
