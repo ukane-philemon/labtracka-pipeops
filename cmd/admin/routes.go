@@ -77,7 +77,7 @@ func (s *Server) registerRoutes() http.Handler {
 		withAuth.Post("/upload-result", nil)
 
 		/**** Notifications ****/
-		withAuth.Get("/notifications", nil)
+		withAuth.Get("/notifications", s.handleGetNotifications)
 		withAuth.Post("/mark-notifications-as-read", s.handleMarkNotificationAsRead)
 
 		/**** Miscellaneous ****/

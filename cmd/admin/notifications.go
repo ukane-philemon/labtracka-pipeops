@@ -9,6 +9,24 @@ import (
 	"github.com/ukane-philemon/labtracka-api/db"
 )
 
+// handleGetNotifications handles the "GET /notifications" endpoint and returns
+// all notification for the logged in admin.
+func (s *Server) handleGetNotifications(res http.ResponseWriter, req *http.Request) {
+	authID := s.reqAuthID(req)
+	if authID == "" {
+		s.badRequest(res, req, "you not authorized to access this resource")
+		return
+	}
+
+	notifications, err := s.db.Notifications(authID)
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("db.Notifications error: %w", err))
+		return
+	}
+
+	s.sendSuccessResponseWithData(res, req, notifications)
+}
+
 // handleMarkNotificationAsRead handles the "POST /mark-notifications-as-read"
 // endpoint and marks the notifications provided as query params noteID,
 // multiple IDs must be supported by a coma ",".
