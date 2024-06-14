@@ -42,3 +42,11 @@ type authResponse struct {
 	AccessToken     string `json:"access_token"`
 	ExpiryInSeconds uint64 `json:"expiry_in_seconds"`
 }
+
+// resetPasswordRequest is information required to reset patient password.
+type resetPasswordRequest struct {
+	Email                string `json:"email"`
+	NewPassword          string `json:"new_password"`
+	DeviceID             string `json:"device_id"`
+	EmailValidationToken string `json:"email_validation_token"`
+}

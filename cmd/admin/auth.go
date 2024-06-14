@@ -173,3 +173,48 @@ func (s *Server) handleLogin(res http.ResponseWriter, req *http.Request) {
 
 	s.sendSuccessResponseWithData(res, req, resp)
 }
+
+// handleResetPassword handles the "POST /reset-password" and resets the
+// password of an existing admin.
+func (s *Server) handleResetPassword(res http.ResponseWriter, req *http.Request) {
+	var reqBody *resetPasswordRequest
+	err := request.DecodeJSONStrict(res, req, &reqBody)
+	if err != nil {
+		s.badRequest(res, req, "invalid request body")
+		return
+	}
+
+	if validator.AnyValueEmpty(reqBody.Email, reqBody.DeviceID, reqBody.NewPassword, reqBody.EmailValidationToken) {
+		s.badRequest(res, req, "missing required field(s)")
+		return
+	}
+
+	if !validator.IsEmail(reqBody.Email) {
+		s.badRequest(res, req, "invalid email")
+		return
+	}
+
+	if !validator.IsPasswordValid(reqBody.NewPassword) {
+		s.badRequest(res, req, validator.PassWordErrorMsg)
+		return
+	}
+
+	if isValid := s.optManager.ValidateOTPValidationToken(reqBody.DeviceID, reqBody.EmailValidationToken, reqBody.Email); !isValid {
+		s.badRequest(res, req, "invalid OTP")
+		return
+	}
+
+	err = s.db.ResetPassword(reqBody.Email, reqBody.NewPassword)
+	if err != nil {
+		if errors.Is(err, db.ErrorInvalidRequest) {
+			s.badRequest(res, req, trimErrorInvalidRequest(err))
+		} else {
+			s.serverError(res, req, fmt.Errorf("db.ResetPassword error: %w", err))
+		}
+		return
+	}
+
+	s.optManager.DeleteOTPRecord(reqBody.DeviceID)
+
+	s.sendSuccessResponse(res, req, "Password reset was successful, please proceed to login")
+}

@@ -11,6 +11,9 @@ type Database interface {
 	// AdminLabs returns a list of labs added to the db for only super admin.
 	// The provided email must match a super admin.
 	AdminLabs(email string) ([]*db.AdminLabInfo, error)
+	// ResetPassword reset the password of an existing admin. Returns an
+	// ErrorInvalidRequest if the email is not tied to an existing admin.
+	ResetPassword(email, password string) error
 	// Notifications returns all the notifications for patient sorted by unread
 	// first.
 	Notifications(email string) ([]*db.Notification, error)

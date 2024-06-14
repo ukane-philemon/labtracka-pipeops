@@ -8,3 +8,9 @@ import "github.com/ukane-philemon/labtracka-api/db"
 func (m *MongoDB) LoginAdmin(req *db.LoginRequest) (*db.Admin, error) {
 	return nil, nil
 }
+
+// ResetPassword reset the password of an existing admin. Returns an
+// ErrorInvalidRequest if the email is not tied to an existing admin.
+func (m *MongoDB) ResetPassword(email, password string) error {
+	return nil
+}
