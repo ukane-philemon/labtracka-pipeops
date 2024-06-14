@@ -13,15 +13,15 @@ import (
 
 var passwordEncryptionCost = 12
 
-// CreateAccount creates a new customer and their information are saved to the
+// CreateAccount creates a new patient and their information are saved to the
 // database. Returns an ErrorInvalidRequest if user email is already tied to
-// another customer.
+// another patient.
 func (m *MongoDB) CreateAccount(req *db.CreateAccountRequest) error {
-	if req.Customer == nil || req.DeviceID == "" || req.Password == "" {
+	if req.Patient == nil || req.DeviceID == "" || req.Password == "" {
 		return fmt.Errorf("%w: missing required field(s)", db.ErrorInvalidRequest)
 	}
 
-	err := req.Customer.Validate()
+	err := req.Patient.Validate()
 	if err != nil {
 		return fmt.Errorf("%w: %v", db.ErrorInvalidRequest, err)
 	}
@@ -31,17 +31,17 @@ func (m *MongoDB) CreateAccount(req *db.CreateAccountRequest) error {
 		return fmt.Errorf("bcrypt.GenerateFromPassword error: %w", err)
 	}
 
-	customerInfo := &dbCustomer{
-		CustomerInfo:       req.Customer,
+	patientInfo := &dbPatient{
+		PatientInfo:        req.Patient,
 		Password:           string(encryptedPassword),
 		CreatedAtTimestamp: time.Now().Unix(),
 		DeviceID:           req.DeviceID,
 	}
 
-	_, err = m.customer.Collection(accountCollection).InsertOne(m.ctx, customerInfo)
+	_, err = m.patient.Collection(accountCollection).InsertOne(m.ctx, patientInfo)
 	if err != nil {
 		if mongo.IsDuplicateKeyError(err) {
-			return fmt.Errorf("%w: customer already exists", db.ErrorInvalidRequest)
+			return fmt.Errorf("%w: patient already exists", db.ErrorInvalidRequest)
 		}
 		return fmt.Errorf("accountCollection.InsertOne error: %w", err)
 	}
@@ -50,7 +50,7 @@ func (m *MongoDB) CreateAccount(req *db.CreateAccountRequest) error {
 }
 
 // PatientInfo returns the information of the patient with the provided email.
-func (m *MongoDB) PatientInfo(email string) (*db.Customer, error) {
+func (m *MongoDB) PatientInfo(email string) (*db.Patient, error) {
 	return nil, nil
 }
 
@@ -59,7 +59,7 @@ func (m *MongoDB) AddSubAccount(email string, account *db.SubAccount) ([]*db.Sub
 	return nil, nil
 }
 
-// SubAccounts returns the sub account for the customer with the provided
+// SubAccounts returns the sub account for the patient with the provided
 // email address.
 func (m *MongoDB) SubAccounts(email string) ([]*db.SubAccountInfo, error) {
 	return nil, nil
@@ -73,15 +73,15 @@ func (m *MongoDB) RemoveSubAccount(email, subAccountID string) ([]*db.SubAccount
 }
 
 // AddNewAddress adds a new address to a patient's profile.
-func (m *MongoDB) AddNewAddress(email string, address *db.CustomerAddress) ([]*db.CustomerAddress, error) {
+func (m *MongoDB) AddNewAddress(email string, address *db.PatientAddress) ([]*db.PatientAddress, error) {
 	if err := address.Validate(); err != nil {
 		return nil, fmt.Errorf("%w: %v", db.ErrorInvalidRequest, err)
 	}
 
-	var customer *dbCustomer
-	filter := bson.M{mapKey(customerInfoKey, emailKey): email}
-	accountsColl := m.customer.Collection(accountCollection)
-	err := accountsColl.FindOne(m.ctx, filter).Decode(&customer)
+	var patient *dbPatient
+	filter := bson.M{mapKey(patientInfoKey, emailKey): email}
+	accountsColl := m.patient.Collection(accountCollection)
+	err := accountsColl.FindOne(m.ctx, filter).Decode(&patient)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, fmt.Errorf("account (%s) not found", email)
@@ -89,11 +89,11 @@ func (m *MongoDB) AddNewAddress(email string, address *db.CustomerAddress) ([]*d
 		return nil, err
 	}
 
-	customer.OtherAddress = append(customer.OtherAddress, address)
-	_, err = accountsColl.UpdateByID(m.ctx, customer.ID, bson.M{setAction: bson.M{mapKey(customerInfoKey, otherAddressKey): customer.OtherAddress}})
+	patient.OtherAddress = append(patient.OtherAddress, address)
+	_, err = accountsColl.UpdateByID(m.ctx, patient.ID, bson.M{setAction: bson.M{mapKey(patientInfoKey, otherAddressKey): patient.OtherAddress}})
 	if err != nil {
 		return nil, err
 	}
 
-	return customer.OtherAddress, nil
+	return patient.OtherAddress, nil
 }

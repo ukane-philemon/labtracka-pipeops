@@ -74,7 +74,7 @@ func NewServer(patientDB Database, adminDB AdminDatabase, cfg *Config) (*Server,
 			return nil, err
 		}
 	} else {
-		s.logger.Info("Proceeding with customer server without email sending enabled...")
+		s.logger.Info("Proceeding with patient server without email sending enabled...")
 	}
 
 	return s, nil
@@ -137,7 +137,7 @@ func (s *Server) Run() {
 }
 
 func (s *Server) reqAuthID(req *http.Request) string {
-	emailCtxValue := req.Context().Value(customerEmailCtx)
+	emailCtxValue := req.Context().Value(patientEmailCtx)
 	if emailCtxValue != nil {
 		return emailCtxValue.(string)
 	}

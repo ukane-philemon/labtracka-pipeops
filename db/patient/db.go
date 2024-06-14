@@ -14,10 +14,10 @@ import (
 )
 
 const (
-	customerDatabaseDev  = "customer-dev"
-	customerDatabaseProd = "customer-prod"
+	patientDatabaseDev  = "patient-dev"
+	patientDatabaseProd = "patient-prod"
 
-	/**** Customer Collections ****/
+	/**** Patient Collections ****/
 
 	accountCollection     = "accounts"
 	loginRecordCollection = "login-records"
@@ -25,16 +25,12 @@ const (
 	// Fields
 
 	dbIDKey         = "_id"
-	idKey           = "id"
 	deviceIDKey     = "current_device_id"
 	emailKey        = "email"
 	lastLoginKey    = "last_login"
 	statusKey       = "status"
-	customerInfoKey = "customerinfo" // embedded
+	patientInfoKey  = "patientinfo" // embedded
 	otherAddressKey = "other_address"
-
-	customerResultsKey = "customer_results"
-	customerIDKey      = "customer_id"
 
 	// Special actions
 	greaterThan = "$gt"
@@ -50,8 +46,8 @@ type MongoDB struct {
 	ctx context.Context
 	log *slog.Logger
 
-	client   *mongo.Client
-	customer *mongo.Database
+	client  *mongo.Client
+	patient *mongo.Database
 }
 
 // New creates and connects a new *MongoDB instance.
@@ -74,29 +70,29 @@ func New(ctx context.Context, devMode bool, logger *slog.Logger, connectionURL s
 		return nil, fmt.Errorf("client.Ping error: %w", err)
 	}
 
-	customerDB := customerDatabaseDev
+	patientDB := patientDatabaseDev
 	if !devMode {
-		customerDB = customerDatabaseProd
+		patientDB = patientDatabaseProd
 	}
 
 	m := &MongoDB{
-		ctx:      ctx,
-		client:   client,
-		customer: client.Database(customerDB),
-		log:      logger,
+		ctx:     ctx,
+		client:  client,
+		patient: client.Database(patientDB),
+		log:     logger,
 	}
 
 	// Create unique indexes.
 	accountUniqueIndex := true
-	m.customer.Collection(accountCollection).Indexes().CreateOne(m.ctx, mongo.IndexModel{
-		Keys: bson.D{{Key: emailKey, Value: 1}, {Key: idKey, Value: 1}},
+	m.patient.Collection(accountCollection).Indexes().CreateOne(m.ctx, mongo.IndexModel{
+		Keys: bson.D{{Key: emailKey, Value: 1}},
 		Options: &options.IndexOptions{
 			Unique: &accountUniqueIndex,
 		},
 	})
 	// TODO: Create indexes for other collections.
 
-	m.log.Info("Customer database connected successfully!")
+	m.log.Info("patient database connected successfully!")
 
 	return m, nil
 }

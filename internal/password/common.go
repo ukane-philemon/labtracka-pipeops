@@ -5420,7 +5420,7 @@ var CommonPasswords = []string{
 	"conan",
 	"daewoo",
 	"cyrus",
-	"customer",
+	"patient",
 	"nation",
 	"nemrac58",
 	"nnnnn",

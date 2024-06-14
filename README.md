@@ -1,7 +1,7 @@
 # LabTracka
 
 LabTracka is an innovative solution for modern-day Medical Laboratories, a
-one-stop platform for Medical Labs to provide online services to customers. This
+one-stop platform for Medical Labs to provide online services to patients. This
 platform also caters for companies and medical professionals.
 
 This is the LabTracka repo in conjunction with the Hackathon Organized by

@@ -142,14 +142,14 @@ func (s *Server) handleLogin(res http.ResponseWriter, req *http.Request) {
 		NotificationToken: reqBody.NotificationToken,
 	}
 
-	patientInfo, err := s.db.LoginCustomer(loginReq)
+	patientInfo, err := s.db.LoginPatient(loginReq)
 	if err != nil {
 		if errors.Is(err, db.ErrorInvalidRequest) {
 			s.badRequest(res, req, "incorrect email or password")
 		} else if errors.Is(err, db.ErrorOTPRequired) {
 			s.badRequest(res, req, "otp required")
 		} else {
-			s.serverError(res, req, fmt.Errorf("db.LoginCustomer: %w", err))
+			s.serverError(res, req, fmt.Errorf("db.LoginPatient: %w", err))
 		}
 		return
 	}
@@ -175,7 +175,7 @@ func (s *Server) handleLogin(res http.ResponseWriter, req *http.Request) {
 	}
 
 	s.sendSuccessResponseWithData(res, req, &loginResponse{
-		Customer:      patientInfo,
+		Patient:       patientInfo,
 		PatientStats:  patientStats,
 		AvailableLabs: labsAvailable,
 		Auth:          &authResponse{AccessToken: accessToken, ExpiryInSeconds: uint64(jwt.JWTExpiry.Seconds())},
@@ -183,7 +183,7 @@ func (s *Server) handleLogin(res http.ResponseWriter, req *http.Request) {
 }
 
 // handleResetPassword handles the "POST /reset-password" and resets the
-// password of an existing customer.
+// password of an existing patient.
 func (s *Server) handleResetPassword(res http.ResponseWriter, req *http.Request) {
 	var reqBody *resetPasswordRequest
 	err := request.DecodeJSONStrict(res, req, &reqBody)
@@ -257,7 +257,7 @@ func (s *Server) handleResetPassword(res http.ResponseWriter, req *http.Request)
 // }
 
 // handleRefreshAuthToken handles the "GET /refresh-auth-token" endpoint and
-// returns a new access token for a logged in customer.
+// returns a new access token for a logged in patient.
 func (s *Server) handleRefreshAuthToken(res http.ResponseWriter, req *http.Request) {
 	authID := s.reqAuthID(req)
 	if authID == "" {
@@ -278,7 +278,7 @@ func (s *Server) handleRefreshAuthToken(res http.ResponseWriter, req *http.Reque
 }
 
 // handleChangePassword handles the "POST /change-password" endpoint and updates
-// the password of an existing customer.
+// the password of an existing patient.
 func (s *Server) handleChangePassword(res http.ResponseWriter, req *http.Request) {
 	authID := s.reqAuthID(req)
 	if authID == "" {

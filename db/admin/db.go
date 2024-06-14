@@ -73,7 +73,7 @@ func New(ctx context.Context, devMode bool, logger *slog.Logger, connectionURL s
 	// })
 	// TODO: Create indexes for other collections.
 
-	m.log.Info("Customer database connected successfully!")
+	m.log.Info("Admin database connected successfully!")
 
 	return m, nil
 }

@@ -74,7 +74,7 @@ func NewServer(adminDB Database, patientDB PatientDatabase, cfg *Config) (*Serve
 			return nil, err
 		}
 	} else {
-		s.logger.Info("Proceeding with customer server without email sending enabled...")
+		s.logger.Info("Proceeding with admin server without email sending enabled...")
 	}
 
 	return s, nil

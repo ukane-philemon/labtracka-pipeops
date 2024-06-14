@@ -5,9 +5,9 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type dbCustomer struct {
+type dbPatient struct {
 	ID primitive.ObjectID `bson:"_id"`
-	*db.CustomerInfo
+	*db.PatientInfo
 	ProfileImage       string `bson:"profile_image"`
 	DeviceID           string `bson:"device_id"`
 	Password           string

@@ -6,7 +6,7 @@ import (
 )
 
 // handleGetResults handles the "GET /results" endpoint and returns the results
-// of an existing customer.
+// of an existing patient.
 func (s *Server) handleGetResults(res http.ResponseWriter, req *http.Request) {
 	authID := s.reqAuthID(req)
 	if authID == "" {

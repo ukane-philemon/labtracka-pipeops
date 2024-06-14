@@ -59,7 +59,7 @@ func main() {
 		startAdminServer(patientDB, adminDB, &adminapi.Config{
 			DevMode:      devMode,
 			ServerHost:   "localhost",
-			ServerPort:   "8080",
+			ServerPort:   "8081",
 			ServerEmail:  "ukanephilemon@gmail.com",
 			SMTPHost:     "smtp-relay.brevo.com",
 			SMTPPort:     587,
@@ -84,7 +84,7 @@ func startAdminServer(patientDB *patientdb.MongoDB, adminDB *admindb.MongoDB, cf
 }
 
 func startPatientServer(patientDB *patientdb.MongoDB, adminDB *admindb.MongoDB, cfg *patientapi.Config) {
-	customerServer, err := patientapi.NewServer(patientDB, adminDB, cfg)
+	patientServer, err := patientapi.NewServer(patientDB, adminDB, cfg)
 	if err != nil {
 		trace := string(debug.Stack())
 		fmt.Println(err)
@@ -92,5 +92,5 @@ func startPatientServer(patientDB *patientdb.MongoDB, adminDB *admindb.MongoDB, 
 		os.Exit(1)
 	}
 
-	customerServer.Run()
+	patientServer.Run()
 }

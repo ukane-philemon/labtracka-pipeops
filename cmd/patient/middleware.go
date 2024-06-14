@@ -8,7 +8,7 @@ import (
 const (
 	accessTokenHeader = "X-LabTracka-Access-Token"
 
-	customerEmailCtx = "email"
+	patientEmailCtx = "email"
 )
 
 // accessTokenValidator checks that the request provides a valid access token.
@@ -26,7 +26,7 @@ func (s *Server) accessTokenValidator(next http.Handler) http.Handler {
 			return
 		}
 
-		req.WithContext(context.WithValue(req.Context(), customerEmailCtx, id))
+		req.WithContext(context.WithValue(req.Context(), patientEmailCtx, id))
 		next.ServeHTTP(res, req)
 	})
 }

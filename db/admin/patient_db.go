@@ -8,7 +8,7 @@ func (m *MongoDB) PatientLabStats(patientID string) (db.PatientStats, error) {
 	return db.PatientStats{}, nil
 }
 
-// Results returns all results for the customer with the specified email
+// Results returns all results for the patient with the specified email
 // address.
 func (m *MongoDB) Results(patientID string) ([]*db.LabResult, error) {
 	return nil, nil

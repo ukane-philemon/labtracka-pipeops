@@ -32,13 +32,13 @@ type loginRequest struct {
 }
 
 type loginResponse struct {
-	*db.Customer
+	*db.Patient
 	db.PatientStats
 	AvailableLabs []*db.BasicLabInfo `json:"available_labs"`
 	Auth          *authResponse      `json:"auth"`
 }
 
-// resetPasswordRequest is information required to reset customer password.
+// resetPasswordRequest is information required to reset patient password.
 type resetPasswordRequest struct {
 	Email                string `json:"email"`
 	NewPassword          string `json:"new_password"`
@@ -47,18 +47,17 @@ type resetPasswordRequest struct {
 }
 
 // changePasswordRequest is information required to change password for a logged
-// in customer.
+// in patient.
 type changePasswordRequest struct {
 	CurrentPassword string `json:"current_password"`
 	NewPassword     string `json:"new_password"`
 }
 
 type createAccountRequest struct {
-	db.CustomerInfo
+	db.PatientInfo
 	DeviceID             string `json:"device_id"`
 	Password             string `json:"password"`
 	EmailValidationToken string `json:"email_validation_code"`
-	DecryptedToken       string `json:"decrypted_token"`
 }
 
 type authResponse struct {
@@ -67,5 +66,5 @@ type authResponse struct {
 }
 
 type patientProfile struct {
-	db.CustomerInfo
+	db.PatientInfo
 }

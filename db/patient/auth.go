@@ -13,18 +13,18 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// LoginCustomer logs a customer into their account. Returns an
+// LoginPatient logs a patient into their account. Returns an
 // ErrorInvalidRequest is user email or password is invalid/not correct or does
 // not exist or an ErrorOTPRequired if otp validation is required for this
 // account.
-func (m *MongoDB) LoginCustomer(loginReq *db.LoginRequest) (*db.Customer, error) {
+func (m *MongoDB) LoginPatient(loginReq *db.LoginRequest) (*db.Patient, error) {
 	if validator.AnyValueEmpty(loginReq.Email, loginReq.Password, loginReq.ClientIP, loginReq.DeviceID) {
 		return nil, errors.New("missing required field(s)")
 	}
 
-	var customer *dbCustomer
-	accountsColl := m.customer.Collection(accountCollection)
-	err := accountsColl.FindOne(m.ctx, bson.M{mapKey(customerInfoKey, emailKey): loginReq.Email}).Decode(&customer)
+	var patient *dbPatient
+	accountsColl := m.patient.Collection(accountCollection)
+	err := accountsColl.FindOne(m.ctx, bson.M{mapKey(patientInfoKey, emailKey): loginReq.Email}).Decode(&patient)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, fmt.Errorf("%w: incorrect email or password", db.ErrorInvalidRequest)
@@ -33,7 +33,7 @@ func (m *MongoDB) LoginCustomer(loginReq *db.LoginRequest) (*db.Customer, error)
 	}
 
 	// Check password.
-	if err := bcrypt.CompareHashAndPassword([]byte(customer.Password), []byte(loginReq.Password)); err != nil {
+	if err := bcrypt.CompareHashAndPassword([]byte(patient.Password), []byte(loginReq.Password)); err != nil {
 		return nil, fmt.Errorf("%w: incorrect email or password", db.ErrorInvalidRequest)
 	}
 
@@ -44,10 +44,10 @@ func (m *MongoDB) LoginCustomer(loginReq *db.LoginRequest) (*db.Customer, error)
 	}
 	defer session.EndSession(m.ctx)
 
-	if loginReq.DeviceID != customer.DeviceID {
+	if loginReq.DeviceID != patient.DeviceID {
 		if loginReq.SaveNewDeviceID {
 			_, err = session.WithTransaction(m.ctx, func(ctx mongo.SessionContext) (interface{}, error) {
-				return accountsColl.UpdateByID(ctx, customer.ID, bson.M{setAction: bson.M{deviceIDKey: loginReq.DeviceID}})
+				return accountsColl.UpdateByID(ctx, patient.ID, bson.M{setAction: bson.M{deviceIDKey: loginReq.DeviceID}})
 			})
 		} else {
 			err = fmt.Errorf("%w: otp validation is required for new device", db.ErrorOTPRequired)
@@ -59,10 +59,10 @@ func (m *MongoDB) LoginCustomer(loginReq *db.LoginRequest) (*db.Customer, error)
 
 	// Log the login ip address.
 	_, err = session.WithTransaction(m.ctx, func(ctx mongo.SessionContext) (interface{}, error) {
-		filter := bson.M{dbIDKey: customer.ID}
+		filter := bson.M{dbIDKey: patient.ID}
 		update := bson.M{setAction: bson.M{mapKey(lastLoginKey, loginReq.ClientIP): time.Now().Unix()}}
 		opts := options.FindOneAndUpdate().SetUpsert(true)
-		res := m.customer.Collection(loginRecordCollection).FindOneAndUpdate(ctx, filter, update, opts)
+		res := m.patient.Collection(loginRecordCollection).FindOneAndUpdate(ctx, filter, update, opts)
 		return res, res.Err()
 	})
 
@@ -71,27 +71,27 @@ func (m *MongoDB) LoginCustomer(loginReq *db.LoginRequest) (*db.Customer, error)
 		return nil, fmt.Errorf("error committing session: %w", err)
 	}
 
-	return &db.Customer{
-		ID:              customer.ID.String(),
-		CustomerInfo:    *customer.CustomerInfo,
-		ProfileImageURL: customer.ProfileImage,
+	return &db.Patient{
+		ID:              patient.ID.String(),
+		PatientInfo:     *patient.PatientInfo,
+		ProfileImageURL: patient.ProfileImage,
 	}, nil
 }
 
-// ResetPassword reset the password of an existing customer. Returns an
-// ErrorInvalidRequest if the email is not tied to an existing customer.
+// ResetPassword reset the password of an existing patient. Returns an
+// ErrorInvalidRequest if the email is not tied to an existing patient.
 func (m *MongoDB) ResetPassword(email, password string) error {
 	return nil
 }
 
-// ChangePassword updates the password for an existing customer. Returns an
-// ErrorInvalidRequest if email is not tied to an existing customer or
+// ChangePassword updates the password for an existing patient. Returns an
+// ErrorInvalidRequest if email is not tied to an existing patient or
 // current password is incorrect.
 func (m *MongoDB) ChangePassword(email, currentPassword, newPassword string) error {
 	return nil
 }
 
-// Notifications returns all the notifications for customer sorted by unread
+// Notifications returns all the notifications for patient sorted by unread
 // first.
 func (m *MongoDB) Notifications(email string) ([]*db.Notification, error) {
 	return nil, nil

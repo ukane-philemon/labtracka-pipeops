@@ -10,7 +10,7 @@ import (
 )
 
 // handleGetNotifications handles the "GET /notifications" endpoint and returns
-// all notification for the logged in customer.
+// all notification for the logged in patient.
 func (s *Server) handleGetNotifications(res http.ResponseWriter, req *http.Request) {
 	authID := s.reqAuthID(req)
 	if authID == "" {

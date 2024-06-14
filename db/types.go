@@ -12,37 +12,37 @@ import (
 
 /**** USER TYPES ****/
 
-// CustomerInfo is information about a customer.
-type CustomerInfo struct {
-	Name         string             `json:"name"`
-	Email        string             `json:"email"`
-	PhoneNumber  string             `json:"phone_number" bson:"phone_number"` // optional
-	DateOfBirth  time.Time          `json:"date_of_birth" bson:"date_of_birth"`
-	Address      *CustomerAddress   `json:"customer_address" bson:"customer_address"`
-	OtherAddress []*CustomerAddress `json:"other_address" bson:"other_address"`
-	Gender       string             `json:"gender"`
+// PatientInfo is information about a patient.
+type PatientInfo struct {
+	Name         string            `json:"name"`
+	Email        string            `json:"email"`
+	PhoneNumber  string            `json:"phone_number" bson:"phone_number"` // optional
+	DateOfBirth  time.Time         `json:"date_of_birth" bson:"date_of_birth"`
+	Address      *PatientAddress   `json:"patient_address" bson:"patient_address"`
+	OtherAddress []*PatientAddress `json:"other_address" bson:"other_address"`
+	Gender       string            `json:"gender"`
 }
 
-func (u *CustomerInfo) Validate() error {
+func (p *PatientInfo) Validate() error {
 	v := new(validator.Validator)
-	v.Check(u.Name != "", "customer name is required")
-	v.Check(validator.IsEmail(u.Email), "a valid email address is required")
-	v.Check(u.PhoneNumber == "" || validator.IsValidPhoneNumber(u.PhoneNumber), "phone number is invalid")
-	v.Check(!u.DateOfBirth.IsZero() && !u.DateOfBirth.After(time.Now()), "please provide a valid date of birth")
-	v.Check(time.Since(u.DateOfBirth) > 24*365*18*time.Hour, "you must be at least 18 years or older")
-	v.Check(u.Gender == "Male" || u.Gender == "Female", `gender must either be "Male" or "Female"`)
-	v.Check(u.Address != nil, "customer address is required")
+	v.Check(p.Name != "", "patient name is required")
+	v.Check(validator.IsEmail(p.Email), "a valid email address is required")
+	v.Check(p.PhoneNumber == "" || validator.IsValidPhoneNumber(p.PhoneNumber), "phone number is invalid")
+	v.Check(!p.DateOfBirth.IsZero() && !p.DateOfBirth.After(time.Now()), "please provide a valid date of birth")
+	v.Check(time.Since(p.DateOfBirth) > 24*365*18*time.Hour, "you must be at least 18 years or older")
+	v.Check(p.Gender == "Male" || p.Gender == "Female", `gender must either be "Male" or "Female"`)
+	v.Check(p.Address != nil, "patient address is required")
 
 	if v.HasErrors() {
 		return errors.New(strings.Join(v.Errors, ", "))
 	}
 
-	if err := u.Address.Validate(); err != nil {
+	if err := p.Address.Validate(); err != nil {
 		return err
 	}
 
-	for i := range u.OtherAddress {
-		if err := u.OtherAddress[i].Validate(); err != nil {
+	for i := range p.OtherAddress {
+		if err := p.OtherAddress[i].Validate(); err != nil {
 			return err
 		}
 	}
@@ -50,7 +50,7 @@ func (u *CustomerInfo) Validate() error {
 	return nil
 }
 
-type CustomerAddress struct {
+type PatientAddress struct {
 	Coordinates string `json:"coordinates"`
 	HouseNumber string `json:"house_number" bson:"house_number"`
 	StreetName  string `json:"street_name" bson:"street_name"`
@@ -58,12 +58,12 @@ type CustomerAddress struct {
 	Country     string `json:"country"`
 }
 
-func (ca *CustomerAddress) Validate() error {
+func (pa *PatientAddress) Validate() error {
 	v := new(validator.Validator)
-	v.Check(ca.HouseNumber != "", "house number is required")
-	v.Check(ca.StreetName != "", "street name is required")
-	v.Check(ca.City != "", "city is required")
-	v.Check(ca.Country != "", `country is required`)
+	v.Check(pa.HouseNumber != "", "house number is required")
+	v.Check(pa.StreetName != "", "street name is required")
+	v.Check(pa.City != "", "city is required")
+	v.Check(pa.Country != "", `country is required`)
 
 	if v.HasErrors() {
 		return errors.New(strings.Join(v.Errors, ", "))
@@ -72,18 +72,18 @@ func (ca *CustomerAddress) Validate() error {
 	return nil
 }
 
-// Customer is the complete information about a customer, including password
+// Patient is the complete information about a patient, including password
 // information.
-type Customer struct {
+type Patient struct {
 	ID              string `json:"id"`
 	ProfileImageURL string `json:"profile_image" bson:"profile_image"`
-	CustomerInfo
+	PatientInfo
 }
 
-// CreateAccountRequest is a struct used to pass around argument for customer
+// CreateAccountRequest is a struct used to pass around argument for patient's
 // account creation.
 type CreateAccountRequest struct {
-	Customer *CustomerInfo
+	Patient  *PatientInfo
 	DeviceID string
 	Password string
 }
@@ -110,12 +110,12 @@ type SubAccount struct {
 
 func (sa *SubAccount) Validate() error {
 	v := new(validator.Validator)
-	v.Check(sa.Name != "", "customer name is required")
+	v.Check(sa.Name != "", "patient name is required")
 	v.Check(validator.IsEmail(sa.Email), "a valid email address is required")
 	v.Check(sa.PhoneNumber == "" || validator.IsValidPhoneNumber(sa.PhoneNumber), "phone number is invalid")
 	v.Check(!sa.DateOfBirth.IsZero() && !sa.DateOfBirth.After(time.Now()), "please provide a valid date of birth")
 	v.Check(sa.Gender == "Male" || sa.Gender == "Female", `gender must either be "Male" or "Female"`)
-	v.Check(sa.Address != "", "customer address is required")
+	v.Check(sa.Address != "", "patient address is required")
 
 	if v.HasErrors() {
 		return errors.New(strings.Join(v.Errors, ", "))
@@ -125,7 +125,7 @@ func (sa *SubAccount) Validate() error {
 }
 
 // LoginRequest is information require by the database implementation to login a
-// user (customer or admin).
+// user (patient or admin).
 type LoginRequest struct {
 	Email             string `json:"email"`
 	Password          string `json:"password"`
@@ -237,22 +237,22 @@ type OrderTest struct {
 }
 
 type Order struct {
-	ID           string           `json:"id"`
-	Description  string           `json:"description"`
-	TotalAmount  float64          `json:"total_amount" bson:"total_amount"`
-	Tests        []*OrderTest     `json:"tests"`
-	PatientID    string           `json:"patient_id" bson:"patient_id"`
-	SubAccountID string           `json:"sub_account_id" bson:"sub_account_id"`
-	Status       string           `json:"status"` // Pending/Paid
-	Address      *CustomerAddress `json:"patient_address" bson:"patient_address"`
-	Timestamp    int64            `json:"timestamp"`
+	ID           string          `json:"id"`
+	Description  string          `json:"description"`
+	TotalAmount  float64         `json:"total_amount" bson:"total_amount"`
+	Tests        []*OrderTest    `json:"tests"`
+	PatientID    string          `json:"patient_id" bson:"patient_id"`
+	SubAccountID string          `json:"sub_account_id" bson:"sub_account_id"`
+	Status       string          `json:"status"` // Pending/Paid
+	Address      *PatientAddress `json:"patient_address" bson:"patient_address"`
+	Timestamp    int64           `json:"timestamp"`
 }
 
 type CreateOrderRequest struct {
-	Tests          []string         `json:"tests"` // test ids, can be packages
-	PatientID      string           `json:"patient_id" bson:"patient_id"`
-	SubAccountID   string           `json:"sub_account_id" bson:"sub_account_id"`
-	PatientAddress *CustomerAddress `json:"patient_address" bson:"patient_address"`
+	Tests          []string        `json:"tests"` // test ids, can be packages
+	PatientID      string          `json:"patient_id" bson:"patient_id"`
+	SubAccountID   string          `json:"sub_account_id" bson:"sub_account_id"`
+	PatientAddress *PatientAddress `json:"patient_address" bson:"patient_address"`
 }
 
 // BankCard holds information about a bank card.

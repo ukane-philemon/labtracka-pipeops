@@ -137,8 +137,8 @@ func ParsePhoneNumber(phoneNumber string) (string, bool) {
 	return phoneNumber, false
 }
 
-// IsPasswordValid checks if the length of customers password meets the standard
-// security length and characters.
+// IsPasswordValid checks if the length of password meets the standard security
+// length and characters.
 func IsPasswordValid(password string) bool {
 	if len(password) < 8 || len(password) > 70 {
 		return false

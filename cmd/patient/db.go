@@ -7,28 +7,28 @@ type Database interface {
 
 	/**** Patient ****/
 
-	// CreateAccount creates a new customer and their information are saved to
+	// CreateAccount creates a new patient and their information are saved to
 	// the database. Returns an ErrorInvalidRequest if user email is already
-	// tied to another customer.
+	// tied to another patient.
 	CreateAccount(req *db.CreateAccountRequest) error
 	// PatientInfo returns the information of the patient with the provided
 	// email.
-	PatientInfo(email string) (*db.Customer, error)
-	// LoginCustomer logs a customer into their account. Returns an
+	PatientInfo(email string) (*db.Patient, error)
+	// LoginPatient logs a patient into their account. Returns an
 	// ErrorInvalidRequest is user email or password is invalid/not correct or
 	// does not exist or an ErrorOTPRequired if otp validation is required for
 	// this account.
-	LoginCustomer(loginReq *db.LoginRequest) (*db.Customer, error)
-	// ResetPassword reset the password of an existing customer. Returns an
-	// ErrorInvalidRequest if the email is not tied to an existing customer.
+	LoginPatient(loginReq *db.LoginRequest) (*db.Patient, error)
+	// ResetPassword reset the password of an existing patient. Returns an
+	// ErrorInvalidRequest if the email is not tied to an existing patient.
 	ResetPassword(email, password string) error
-	// ChangePassword updates the password for an existing customer. Returns an
-	// ErrorInvalidRequest if email is not tied to an existing customer or
+	// ChangePassword updates the password for an existing patient. Returns an
+	// ErrorInvalidRequest if email is not tied to an existing patient or
 	// current password is incorrect.
 	ChangePassword(email, currentPassword, newPassword string) error
 	// AddSubAccount adds a new sub account to a patient's profile.
 	AddSubAccount(email string, account *db.SubAccount) ([]*db.SubAccountInfo, error)
-	// SubAccounts returns the sub account for the customer with the provided
+	// SubAccounts returns the sub account for the patient with the provided
 	// email address.
 	SubAccounts(email string) ([]*db.SubAccountInfo, error)
 	// RemoveSubAccount removes a sub account from a patient's record and
@@ -36,7 +36,7 @@ type Database interface {
 	// subAccountID does not exist.
 	RemoveSubAccount(email, subAccountID string) ([]*db.SubAccountInfo, error)
 	// AddNewAddress adds a new address to a patient's profile.
-	AddNewAddress(email string, address *db.CustomerAddress) ([]*db.CustomerAddress, error)
+	AddNewAddress(email string, address *db.PatientAddress) ([]*db.PatientAddress, error)
 	// PatientOrders returns a list of orders made by the patient with the
 	// provided email.
 	PatientOrders(email string) ([]*db.Order, error)
@@ -45,7 +45,7 @@ type Database interface {
 	CreatePatientOrder(email string, orderReq *db.CreateOrderRequest) (string, float64, error)
 	// UpdatePatientOrder updates the status for a patient order.
 	UpdatePatientOrder(email string, orderID, status string) error
-	// Notifications returns all the notifications for customer sorted by unread
+	// Notifications returns all the notifications for patient sorted by unread
 	// first.
 	Notifications(email string) ([]*db.Notification, error)
 	// MarkNotificationsAsRead marks the notifications with the provided noteIDs
@@ -58,7 +58,7 @@ type AdminDatabase interface {
 
 	PatientLabStats(patientID string) (db.PatientStats, error)
 
-	// Results returns all results for the customer with the specified email
+	// Results returns all results for the patient with the specified email
 	// address.
 	Results(patientID string) ([]*db.LabResult, error)
 

@@ -77,5 +77,5 @@ func (s *Server) registerRoutes() http.Handler {
 }
 
 func (s *Server) root(res http.ResponseWriter, _ *http.Request) {
-	response.JSON(res, http.StatusOK, "Welcome to the Labtracka API, visit https://labtracka.com to get started!")
+	response.JSON(res, http.StatusOK, "Welcome to the Labtracka Patient API, visit https://labtracka.com to get started!")
 }

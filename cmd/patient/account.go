@@ -12,7 +12,7 @@ import (
 )
 
 // handleCreateAccount handles the "POST /create-account" endpoint and creates
-// an account or a new customer.
+// an account or a new patient.
 func (s *Server) handleCreateAccount(res http.ResponseWriter, req *http.Request) {
 	var reqBody *createAccountRequest
 	err := request.DecodeJSON(res, req, &reqBody)
@@ -51,7 +51,7 @@ func (s *Server) handleCreateAccount(res http.ResponseWriter, req *http.Request)
 	// }
 
 	err = s.db.CreateAccount(&db.CreateAccountRequest{
-		Customer: &reqBody.CustomerInfo,
+		Patient:  &reqBody.PatientInfo,
 		Password: reqBody.Password,
 		DeviceID: reqBody.DeviceID,
 	})

@@ -10,11 +10,11 @@ import (
 )
 
 const (
-	jwtIssuer = "LabTracka Ltd"
+	jwtIssuer = "LabTracka"
 
-	JWTExpiry           = 15 * time.Minute
-	jwtAudienceAdmin    = "Admin"
-	jwtAudienceCustomer = "Customer"
+	JWTExpiry          = 15 * time.Minute
+	jwtAudienceAdmin   = "Admin"
+	jwtAudiencePatient = "Patient"
 )
 
 type Manager struct {
@@ -40,7 +40,7 @@ func NewJWTManager(forAdmin bool) (*Manager, error) {
 	}
 
 	m := &Manager{
-		aud:     jwtAudienceCustomer,
+		aud:     jwtAudiencePatient,
 		signer:  signer,
 		pubKey:  publicKey,
 		privKey: privateKey,
