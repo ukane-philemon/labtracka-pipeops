@@ -174,9 +174,9 @@ func (s *Server) handleLogin(res http.ResponseWriter, req *http.Request) {
 	s.sendSuccessResponseWithData(res, req, resp)
 }
 
-// handleResetPassword handles the "POST /reset-password" and resets the
-// password of an existing admin.
-func (s *Server) handleResetPassword(res http.ResponseWriter, req *http.Request) {
+// handleSetPassword handles the "POST /set-password" and sets the password of
+// an existing admin.
+func (s *Server) handleSetPassword(res http.ResponseWriter, req *http.Request) {
 	var reqBody *resetPasswordRequest
 	err := request.DecodeJSONStrict(res, req, &reqBody)
 	if err != nil {
