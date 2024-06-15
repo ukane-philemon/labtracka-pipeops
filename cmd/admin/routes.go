@@ -35,7 +35,7 @@ func (s *Server) registerRoutes() http.Handler {
 
 	mux.Group(func(withAuth chi.Router) {
 		// Authentication is required for these routes.
-		// withAuth.Use(nil)
+		withAuth.Use(s.accessTokenValidator)
 
 		/**** Authentication ****/
 		// withAuth.Get("/refresh-auth-token", nil)

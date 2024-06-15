@@ -136,12 +136,6 @@ func (s *Server) Run() {
 	s.wg.Wait()
 }
 
-func (s *Server) reqAuthID(_ *http.Request) string {
-	// TODO: Check that this user is logged in and the auth token is still valid
-	// and return the auth ID.
-	return ""
-}
-
 func (s *Server) sendSuccessResponse(res http.ResponseWriter, req *http.Request, message string) {
 	err := response.JSON(res, http.StatusOK, map[string]string{"message": message})
 	if err != nil {
