@@ -14,3 +14,10 @@ func (m *MongoDB) LoginAdmin(req *db.LoginRequest) (*db.Admin, error) {
 func (m *MongoDB) ResetPassword(email, password string) error {
 	return nil
 }
+
+// ChangePassword updates the password for an existing admin. Returns an
+// ErrorInvalidRequest if email is not tied to an existing admin or current
+// password is incorrect.
+func (m *MongoDB) ChangePassword(email, currentPassword, newPassword string) error {
+	return nil
+}

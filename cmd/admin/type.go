@@ -50,3 +50,10 @@ type resetPasswordRequest struct {
 	DeviceID             string `json:"device_id"`
 	EmailValidationToken string `json:"email_validation_token"`
 }
+
+// changePasswordRequest is information required to change password for a logged
+// in patient.
+type changePasswordRequest struct {
+	CurrentPassword string `json:"current_password"`
+	NewPassword     string `json:"new_password"`
+}

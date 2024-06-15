@@ -239,3 +239,37 @@ func (s *Server) handleRefreshAuthToken(res http.ResponseWriter, req *http.Reque
 		ExpiryInSeconds: uint64(jwt.JWTExpiry.Seconds()),
 	})
 }
+
+// handleChangePassword handles the "POST /change-password" endpoint and updates
+// the password of an existing patient.
+func (s *Server) handleChangePassword(res http.ResponseWriter, req *http.Request) {
+	authID := s.reqAuthID(req)
+	if authID == "" {
+		s.authenticationRequired(res, req)
+		return
+	}
+
+	var reqBody *changePasswordRequest
+	err := request.DecodeJSONStrict(res, req, &reqBody)
+	if err != nil {
+		s.badRequest(res, req, err.Error())
+		return
+	}
+
+	if !validator.IsPasswordValid(reqBody.CurrentPassword) || !validator.IsPasswordValid(reqBody.NewPassword) {
+		s.badRequest(res, req, validator.PassWordErrorMsg)
+		return
+	}
+
+	err = s.db.ChangePassword(authID, reqBody.CurrentPassword, reqBody.NewPassword)
+	if err != nil {
+		if errors.Is(err, db.ErrorInvalidRequest) {
+			s.badRequest(res, req, trimErrorInvalidRequest(err))
+		} else {
+			s.serverError(res, req, fmt.Errorf("db.ChangePassword error: %w", err))
+		}
+		return
+	}
+
+	s.sendSuccessResponse(res, req, "Password update was successful")
+}

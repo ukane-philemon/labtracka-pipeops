@@ -14,6 +14,10 @@ type Database interface {
 	// ResetPassword reset the password of an existing admin. Returns an
 	// ErrorInvalidRequest if the email is not tied to an existing admin.
 	ResetPassword(email, password string) error
+	// ChangePassword updates the password for an existing admin. Returns an
+	// ErrorInvalidRequest if email is not tied to an existing admin or current
+	// password is incorrect.
+	ChangePassword(email, currentPassword, newPassword string) error
 	// Notifications returns all the notifications for patient sorted by unread
 	// first.
 	Notifications(email string) ([]*db.Notification, error)
