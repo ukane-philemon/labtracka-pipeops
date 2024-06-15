@@ -28,7 +28,6 @@ func (s *Server) registerRoutes() http.Handler {
 	mux.Post("/otp-validation", s.handleOTPValidation)
 	mux.Post("/login", s.handleLogin)
 	mux.Post("/reset-password", s.handleSetPassword)
-	// mux.Post("/validate-public-key", s.handlePublicKeyValidation)
 
 	/**** Account ****/
 	// mux.Post("/create-account", nil)
