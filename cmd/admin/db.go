@@ -26,6 +26,9 @@ type Database interface {
 	MarkNotificationsAsRead(email string, noteIDs ...string) error
 	// Faqs returns information about frequently asked questions and help links.
 	Faqs() (*db.Faqs, error)
+	// UpdateFaqs updates the faqs in the database. This is a super admin only
+	// feature.
+	UpdateFaqs(faq *db.Faqs) (*db.Faqs, error)
 	Shutdown()
 }
 
