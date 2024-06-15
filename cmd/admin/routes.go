@@ -81,8 +81,8 @@ func (s *Server) registerRoutes() http.Handler {
 		withAuth.Post("/mark-notifications-as-read", s.handleMarkNotificationAsRead)
 
 		/**** Miscellaneous ****/
-		// withAuth.Get("/faqs", nil)
-		// withAuth.Post("/faqs", nil)
+		withAuth.Get("/faqs", s.handleGetFaqs)
+		// withAuth.Post("/faq", nil)
 	})
 
 	return mux

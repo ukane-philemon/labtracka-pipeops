@@ -24,6 +24,8 @@ type Database interface {
 	// MarkNotificationsAsRead marks the notifications with the provided noteIDs
 	// as read.
 	MarkNotificationsAsRead(email string, noteIDs ...string) error
+	// Faqs returns information about frequently asked questions and help links.
+	Faqs() (*db.Faqs, error)
 	Shutdown()
 }
 
