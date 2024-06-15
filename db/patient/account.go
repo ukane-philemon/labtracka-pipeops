@@ -11,8 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-var passwordEncryptionCost = 12
-
 // CreateAccount creates a new patient and their information are saved to the
 // database. Returns an ErrorInvalidRequest if user email is already tied to
 // another patient.
@@ -26,7 +24,7 @@ func (m *MongoDB) CreateAccount(req *db.CreateAccountRequest) error {
 		return fmt.Errorf("%w: %v", db.ErrorInvalidRequest, err)
 	}
 
-	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), passwordEncryptionCost)
+	encryptedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return fmt.Errorf("bcrypt.GenerateFromPassword error: %w", err)
 	}
