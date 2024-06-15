@@ -218,3 +218,24 @@ func (s *Server) handleResetPassword(res http.ResponseWriter, req *http.Request)
 
 	s.sendSuccessResponse(res, req, "Password reset was successful, please proceed to login")
 }
+
+// handleRefreshAuthToken handles the "GET /refresh-auth-token" endpoint and
+// returns a new access token for a logged in patient.
+func (s *Server) handleRefreshAuthToken(res http.ResponseWriter, req *http.Request) {
+	authID := s.reqAuthID(req)
+	if authID == "" {
+		s.authenticationRequired(res, req)
+		return
+	}
+
+	accessToken, err := s.jwtManager.GenerateJWtToken(authID)
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("jwtManager.GenerateJWtToken: %w", err))
+		return
+	}
+
+	s.sendSuccessResponseWithData(res, req, &authResponse{
+		AccessToken:     accessToken,
+		ExpiryInSeconds: uint64(jwt.JWTExpiry.Seconds()),
+	})
+}

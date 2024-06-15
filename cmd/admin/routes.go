@@ -38,7 +38,7 @@ func (s *Server) registerRoutes() http.Handler {
 		withAuth.Use(s.accessTokenValidator)
 
 		/**** Authentication ****/
-		// withAuth.Get("/refresh-auth-token", nil)
+		withAuth.Get("/refresh-auth-token", s.handleRefreshAuthToken)
 		// withAuth.Post("/change-password", nil)
 
 		/**** Dashboard & Profile ****/
