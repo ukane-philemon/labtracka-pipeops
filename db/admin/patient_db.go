@@ -28,6 +28,11 @@ func (m *MongoDB) LabTests(labID string) (*db.LabTests, error) {
 	return nil, nil
 }
 
+// LabTest returns the information of a lab test from the admin db.
+func (m *MongoDB) LabTest(testID string) (*db.LabTest, error) {
+	return nil, nil
+}
+
 /**** Server Info ****/
 
 // Faqs returns information about frequently asked questions and help links.

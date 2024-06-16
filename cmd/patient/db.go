@@ -70,6 +70,8 @@ type AdminDatabase interface {
 	// for the lab with the provided labID. Returns an ErrorInvalidRequest if
 	// labID does not exist.
 	LabTests(labID string) (*db.LabTests, error)
+	// LabTest returns the information of a lab test from the admin db.
+	LabTest(testID string) (*db.LabTest, error)
 
 	/**** Server Info ****/
 
