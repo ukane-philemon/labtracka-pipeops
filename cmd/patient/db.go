@@ -14,6 +14,9 @@ type Database interface {
 	// PatientInfo returns the information of the patient with the provided
 	// email.
 	PatientInfo(email string) (*db.Patient, error)
+	// PatientInfo returns the information of the patient with the provided
+	// patientID.
+	PatientInfoWithID(patientID string) (*db.Patient, error)
 	// LoginPatient logs a patient into their account. Returns an
 	// ErrorInvalidRequest is user email or password is invalid/not correct or
 	// does not exist or an ErrorOTPRequired if otp validation is required for
