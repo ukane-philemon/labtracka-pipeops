@@ -27,8 +27,10 @@ const (
 	// Fields
 
 	dbIDKey         = "_id"
+	idKey           = "id"
 	deviceIDKey     = "current_device_id"
 	emailKey        = "email"
+	readKey         = "read"
 	lastLoginKey    = "last_login"
 	statusKey       = "status"
 	otherAddressKey = "other_address"

@@ -108,7 +108,7 @@ func (m *MongoDB) Notifications(email string) ([]*db.Notification, error) {
 	var patientNotes []*db.Notification
 	err = cur.Decode(&patientNotes)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decode patient notification: %w", err)
+		return nil, fmt.Errorf("failed to decode patient notifications: %w", err)
 	}
 
 	return patientNotes, nil
@@ -117,5 +117,23 @@ func (m *MongoDB) Notifications(email string) ([]*db.Notification, error) {
 // MarkNotificationsAsRead marks the notifications with the provided noteIDs
 // as read.
 func (m *MongoDB) MarkNotificationsAsRead(email string, noteIDs ...string) error {
+	patientID, err := m.patientID(email)
+	if err != nil {
+		return err
+	}
+
+	notificationsCollection := m.patient.Collection(notificationsCollection)
+	for _, noteID := range noteIDs {
+		filter := bson.M{patientIDKey: patientID, idKey: noteID}
+		res, err := notificationsCollection.UpdateOne(m.ctx, filter, bson.M{readKey: true}, options.Update().SetUpsert(false))
+		if err != nil {
+			return err
+		}
+
+		if res.ModifiedCount == 0 {
+			return fmt.Errorf("%w: note with id %s does not exist", db.ErrorInvalidRequest, noteID)
+		}
+	}
+
 	return nil
 }
