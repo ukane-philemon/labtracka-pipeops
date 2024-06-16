@@ -12,10 +12,30 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-// PatientOrders returns a list of orders made by the patient with the
-// provided email.
+// PatientOrders returns a list of orders made by the patient with the provided
+// email.
 func (m *MongoDB) PatientOrders(email string) ([]*db.Order, error) {
-	return nil, nil
+	var patient *idOnly
+	accountsColl := m.patient.Collection(accountCollection)
+	projection := options.FindOne().SetProjection(bson.M{dbIDKey: 1})
+	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: email}, projection).Decode(&patient)
+	if err != nil {
+		return nil, err
+	}
+
+	ordersCollection := m.patient.Collection(ordersCollection)
+	cur, err := ordersCollection.Find(m.ctx, bson.M{patientIDKey: patient.ID.Hex()})
+	if err != nil {
+		return nil, err
+	}
+
+	var patientOrders []*db.Order
+	err = cur.Decode(&patientOrders)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode patient orders: %w", err)
+	}
+
+	return patientOrders, nil
 }
 
 // CreatePatientOrder creates a new order for the patient and returns the
@@ -53,9 +73,10 @@ func (m *MongoDB) CreatePatientOrder(email string, orderReq *db.OrderInfo) (stri
 
 // UpdatePatientOrder updates the status for a patient order.
 func (m *MongoDB) UpdatePatientOrder(email string, orderIDStr, status string) error {
-	var patient *dbPatient
+	var patient *idOnly
 	accountsColl := m.patient.Collection(accountCollection)
-	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: email}).Decode(&patient)
+	projection := options.FindOne().SetProjection(bson.M{dbIDKey: 1})
+	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: email}, projection).Decode(&patient)
 	if err != nil {
 		return err
 	}

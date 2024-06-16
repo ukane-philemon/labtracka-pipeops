@@ -5,6 +5,10 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
+type idOnly struct {
+	ID primitive.ObjectID `bson:"_id"`
+}
+
 type dbPatient struct {
 	ID                 primitive.ObjectID `bson:"_id"`
 	*db.PatientInfo    `bson:"inline"`
