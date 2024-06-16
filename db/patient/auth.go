@@ -72,7 +72,7 @@ func (m *MongoDB) LoginPatient(loginReq *db.LoginRequest) (*db.Patient, error) {
 	}
 
 	return &db.Patient{
-		ID:              patient.ID.String(),
+		ID:              patient.ID.Hex(),
 		PatientInfo:     *patient.PatientInfo,
 		ProfileImageURL: patient.ProfileImage,
 	}, nil

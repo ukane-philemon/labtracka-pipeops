@@ -9,6 +9,7 @@ import (
 	"github.com/ukane-philemon/labtracka-api/internal/funcs"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 // PatientOrders returns a list of orders made by the patient with the
@@ -47,10 +48,33 @@ func (m *MongoDB) CreatePatientOrder(email string, orderReq *db.OrderInfo) (stri
 		return "", err
 	}
 
-	return res.InsertedID.(primitive.ObjectID).String(), nil
+	return res.InsertedID.(primitive.ObjectID).Hex(), nil
 }
 
 // UpdatePatientOrder updates the status for a patient order.
-func (m *MongoDB) UpdatePatientOrder(email string, orderID, status string) error {
+func (m *MongoDB) UpdatePatientOrder(email string, orderIDStr, status string) error {
+	var patient *dbPatient
+	accountsColl := m.patient.Collection(accountCollection)
+	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: email}).Decode(&patient)
+	if err != nil {
+		return err
+	}
+
+	orderID, err := primitive.ObjectIDFromHex(orderIDStr)
+	if err != nil {
+		return fmt.Errorf("primitive.ObjectIDFromHex error: %w", err)
+	}
+
+	ordersCollection := m.patient.Collection(ordersCollection)
+	orderFilter := bson.M{dbIDKey: orderID, patientIDKey: patient.ID.Hex()}
+	res, err := ordersCollection.UpdateOne(m.ctx, orderFilter, bson.M{statusKey: db.OrderStatusPaid}, options.Update().SetUpsert(false))
+	if err != nil {
+		return fmt.Errorf("ordersCollection.UpdateOne error: %w", err)
+	}
+
+	if res.ModifiedCount == 0 {
+		return fmt.Errorf("patient order with id %s does not exist", orderIDStr)
+	}
+
 	return nil
 }

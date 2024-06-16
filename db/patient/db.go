@@ -31,6 +31,7 @@ const (
 	lastLoginKey    = "last_login"
 	statusKey       = "status"
 	otherAddressKey = "other_address"
+	patientIDKey    = "patient_id"
 
 	// Special actions
 	greaterThan = "$gt"
