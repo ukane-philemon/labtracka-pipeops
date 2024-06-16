@@ -21,6 +21,7 @@ const (
 
 	accountCollection     = "accounts"
 	loginRecordCollection = "login-records"
+	ordersCollection      = "orders"
 
 	// Fields
 
@@ -29,7 +30,6 @@ const (
 	emailKey        = "email"
 	lastLoginKey    = "last_login"
 	statusKey       = "status"
-	patientInfoKey  = "patientinfo" // embedded
 	otherAddressKey = "other_address"
 
 	// Special actions

@@ -2,6 +2,7 @@ package funcs
 
 import (
 	"bytes"
+	"encoding/hex"
 	"fmt"
 	"html/template"
 	"math"
@@ -11,6 +12,7 @@ import (
 	"time"
 	"unicode"
 
+	"github.com/ukane-philemon/labtracka-api/internal/otp"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )
@@ -236,4 +238,12 @@ func NairaToKoboAmt(amt float64) float64 {
 // KoboToNaira converts an amount from Kobo to Naira.
 func KoboToNaira(amount float64) float64 {
 	return amount / 100
+}
+
+func RandomToken(length int) (string, error) {
+	b, err := otp.RandomBytes(length)
+	if err != nil {
+		return "", err
+	}
+	return hex.EncodeToString(b), nil
 }

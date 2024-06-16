@@ -50,6 +50,11 @@ func (s *Server) handleCreateOrder(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	if reqBody.PatientAddress == nil {
+		// TODO: Maybe I should validate that patient owns this address?
+		reqBody.PatientAddress = patient.Address
+	}
+
 	order := &db.OrderInfo{
 		PatientID:    reqBody.PatientID,
 		SubAccountID: reqBody.SubAccountID,

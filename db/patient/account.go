@@ -83,9 +83,8 @@ func (m *MongoDB) AddNewAddress(email string, address *db.Address) ([]*db.Addres
 	}
 
 	var patient *dbPatient
-	filter := bson.M{mapKey(patientInfoKey, emailKey): email}
 	accountsColl := m.patient.Collection(accountCollection)
-	err := accountsColl.FindOne(m.ctx, filter).Decode(&patient)
+	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: email}).Decode(&patient)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, fmt.Errorf("account (%s) not found", email)
@@ -94,7 +93,7 @@ func (m *MongoDB) AddNewAddress(email string, address *db.Address) ([]*db.Addres
 	}
 
 	patient.OtherAddress = append(patient.OtherAddress, address)
-	_, err = accountsColl.UpdateByID(m.ctx, patient.ID, bson.M{setAction: bson.M{mapKey(patientInfoKey, otherAddressKey): patient.OtherAddress}})
+	_, err = accountsColl.UpdateByID(m.ctx, patient.ID, bson.M{setAction: bson.M{otherAddressKey: patient.OtherAddress}})
 	if err != nil {
 		return nil, err
 	}

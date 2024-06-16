@@ -1,6 +1,15 @@
 package patient
 
-import "github.com/ukane-philemon/labtracka-api/db"
+import (
+	"errors"
+	"fmt"
+	"time"
+
+	"github.com/ukane-philemon/labtracka-api/db"
+	"github.com/ukane-philemon/labtracka-api/internal/funcs"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/bson/primitive"
+)
 
 // PatientOrders returns a list of orders made by the patient with the
 // provided email.
@@ -11,7 +20,34 @@ func (m *MongoDB) PatientOrders(email string) ([]*db.Order, error) {
 // CreatePatientOrder creates a new order for the patient and returns the
 // orderID and amount after validating the order.
 func (m *MongoDB) CreatePatientOrder(email string, orderReq *db.OrderInfo) (string, error) {
-	return "", nil
+	orderID, err := funcs.RandomToken(5)
+	if err != nil {
+		return "", fmt.Errorf("funcs.RandomToken error: %w", err)
+	}
+
+	order := &db.Order{
+		ID:        orderID,
+		OrderInfo: *orderReq,
+		Timestamp: time.Now().Unix(),
+	}
+
+	accountsColl := m.patient.Collection(accountCollection)
+	nPatient, err := accountsColl.CountDocuments(m.ctx, bson.M{emailKey: email})
+	if err != nil {
+		return "", err
+	}
+
+	if nPatient == 0 {
+		return "", errors.New("patient does not exist")
+	}
+
+	ordersCollection := m.patient.Collection(ordersCollection)
+	res, err := ordersCollection.InsertOne(m.ctx, order)
+	if err != nil {
+		return "", err
+	}
+
+	return res.InsertedID.(primitive.ObjectID).String(), nil
 }
 
 // UpdatePatientOrder updates the status for a patient order.

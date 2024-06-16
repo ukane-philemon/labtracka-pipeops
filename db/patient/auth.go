@@ -24,7 +24,7 @@ func (m *MongoDB) LoginPatient(loginReq *db.LoginRequest) (*db.Patient, error) {
 
 	var patient *dbPatient
 	accountsColl := m.patient.Collection(accountCollection)
-	err := accountsColl.FindOne(m.ctx, bson.M{mapKey(patientInfoKey, emailKey): loginReq.Email}).Decode(&patient)
+	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: loginReq.Email}).Decode(&patient)
 	if err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, fmt.Errorf("%w: incorrect email or password", db.ErrorInvalidRequest)
