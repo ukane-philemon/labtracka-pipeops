@@ -19,9 +19,10 @@ const (
 
 	/**** Patient Collections ****/
 
-	accountCollection     = "accounts"
-	loginRecordCollection = "login-records"
-	ordersCollection      = "orders"
+	accountCollection       = "accounts"
+	loginRecordCollection   = "login-records"
+	ordersCollection        = "orders"
+	notificationsCollection = "notifications"
 
 	// Fields
 
@@ -103,4 +104,16 @@ func (m *MongoDB) Shutdown() {
 	if err := m.client.Disconnect(m.ctx); err != nil {
 		m.log.Error("User database failed to disconnect: %v", err)
 	}
+}
+
+func (m *MongoDB) patientID(email string) (string, error) {
+	var patient *idOnly
+	accountsColl := m.patient.Collection(accountCollection)
+	projection := options.FindOne().SetProjection(bson.M{dbIDKey: 1})
+	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: email}, projection).Decode(&patient)
+	if err != nil {
+		return "", err
+	}
+
+	return patient.ID.Hex(), nil
 }

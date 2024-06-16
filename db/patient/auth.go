@@ -94,7 +94,24 @@ func (m *MongoDB) ChangePassword(email, currentPassword, newPassword string) err
 // Notifications returns all the notifications for patient sorted by unread
 // first.
 func (m *MongoDB) Notifications(email string) ([]*db.Notification, error) {
-	return nil, nil
+	patientID, err := m.patientID(email)
+	if err != nil {
+		return nil, err
+	}
+
+	notificationsCollection := m.patient.Collection(notificationsCollection)
+	cur, err := notificationsCollection.Find(m.ctx, bson.M{patientIDKey: patientID})
+	if err != nil {
+		return nil, err
+	}
+
+	var patientNotes []*db.Notification
+	err = cur.Decode(&patientNotes)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode patient notification: %w", err)
+	}
+
+	return patientNotes, nil
 }
 
 // MarkNotificationsAsRead marks the notifications with the provided noteIDs
