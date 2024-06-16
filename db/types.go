@@ -78,7 +78,7 @@ type Patient struct {
 	ID              string   `json:"id"`
 	ProfileImageURL string   `json:"profile_image" bson:"profile_image"`
 	SubAccounts     []string `json:"sub_accounts" bson:"sub_accounts"`
-	PatientInfo
+	PatientInfo     `bson:"inline"`
 }
 
 func (p *Patient) HasSubAccount(subAccountID string) bool {
@@ -112,7 +112,7 @@ type AdminStats struct {
 
 type SubAccountInfo struct {
 	ID string `json:"id"`
-	SubAccount
+	SubAccount `bson:"inline"`
 }
 
 type SubAccount struct {
