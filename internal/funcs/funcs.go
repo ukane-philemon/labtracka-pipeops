@@ -229,6 +229,10 @@ func NairaToKobo(amt float64) string {
 	return fmt.Sprintf("%.f", math.Ceil(amt*100)) // round up.
 }
 
+func NairaToKoboAmt(amt float64) float64 {
+	return math.Ceil(amt * 100) // round up.
+}
+
 // KoboToNaira converts an amount from Kobo to Naira.
 func KoboToNaira(amount float64) float64 {
 	return amount / 100

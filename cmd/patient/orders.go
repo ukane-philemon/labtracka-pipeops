@@ -3,10 +3,11 @@ package patient
 import (
 	"errors"
 	"fmt"
-	"math"
 	"net/http"
+	"strings"
 
 	"github.com/ukane-philemon/labtracka-api/db"
+	"github.com/ukane-philemon/labtracka-api/internal/funcs"
 	"github.com/ukane-philemon/labtracka-api/internal/paystack"
 	"github.com/ukane-philemon/labtracka-api/internal/request"
 )
@@ -26,17 +27,62 @@ func (s *Server) handleCreateOrder(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	var reqBody *db.CreateOrderRequest
+	var reqBody *createOrderRequest
 	err := request.DecodeJSON(res, req, &reqBody)
 	if err != nil {
 		s.badRequest(res, req, "invalid request body")
 		return
 	}
 
+	if err := reqBody.PatientAddress.Validate(); err != nil {
+		s.badRequest(res, req, err.Error())
+		return
+	}
+
+	// TODO: Check that the patient_id or sub_account_id exists.
+
+	order := &db.OrderInfo{
+		PatientID:    reqBody.PatientID,
+		SubAccountID: reqBody.SubAccountID,
+		Fee:          feesInNGN,
+		Status:       db.OrderStatusPendingPayment,
+		Address:      reqBody.PatientAddress,
+	}
+
+	for _, testID := range reqBody.Tests {
+		testInfo, err := s.adminDB.LabTest(testID)
+		if err != nil {
+			if errors.Is(err, db.ErrorInvalidRequest) {
+
+			} else {
+				s.serverError(res, req, fmt.Errorf("adminDB.LabTest error: %w", err))
+			}
+			return
+		}
+
+		if !testInfo.IsActive {
+			s.badRequest(res, req, fmt.Sprintf("%s has been disabled", testInfo.Name))
+			return
+		}
+
+		order.Tests = append(order.Tests, &db.OrderTest{
+			LabID:    testInfo.LabID,
+			LabName:  testInfo.LabName,
+			TestID:   testID,
+			TestName: testInfo.Name,
+			Amount:   testInfo.Price,
+		})
+
+		order.Description += ", " + testInfo.Name
+		order.TotalAmount += testInfo.Price
+	}
+
+	order.Description = strings.Trim(order.Description, ",")
+
 	// Create the order for the patient and generate a payment url for the
 	// order. The order would be confirmed when we receive a payment webhook
-	// from provider.
-	orderID, orderAmount, err := s.db.CreatePatientOrder(authID, reqBody)
+	// from our payment provider.
+	orderID, err := s.db.CreatePatientOrder(authID, order)
 	if err != nil {
 		if errors.Is(err, db.ErrorInvalidRequest) {
 			s.badRequest(res, req, trimErrorInvalidRequest(err))
@@ -47,10 +93,9 @@ func (s *Server) handleCreateOrder(res http.ResponseWriter, req *http.Request) {
 	}
 
 	// Create a payment URL for order amount.
-	totalOrderAmount := orderAmount + feesInNGN
 	paymentURL, err := s.paystack.Charge(&paystack.ChargeOptions{
 		Email:        authID,
-		AmountInKobo: math.Ceil(totalOrderAmount * 100),
+		AmountInKobo: funcs.NairaToKoboAmt(order.TotalAmount + order.Fee),
 		MetaData: map[string]interface{}{
 			orderIDKeyForTx: orderID,
 			emailIDKeyForTx: authID,

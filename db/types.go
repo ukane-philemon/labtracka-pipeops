@@ -159,14 +159,15 @@ type AdminLabInfo struct {
 
 // LabTests is information about tests offered by a laboratory.
 type LabTests struct {
-	Categories   []*TestCategory     `json:"categories"`
-	SingleTests  []*LabTest          `json:"single_tests"`
-	TestPackages []*LabHealthPackage `json:"test_packages"`
+	Categories []*TestCategory `json:"categories"`
+	Tests      []*LabTest      `json:"single_tests"`
 }
 
 type LabTest struct {
 	ID                     string   `json:"id"`
 	Name                   string   `json:"name"`
+	LabID                  string   `json:"lab_id"`
+	LabName                string   `json:"lab_name"`
 	Price                  float64  `json:"price"`
 	OldPrice               float64  `json:"old_price" bson:"old_price"`
 	Description            string   `json:"description"`
@@ -174,13 +175,11 @@ type LabTest struct {
 	Categories             []string `json:"categories"`
 	IsActive               bool     `json:"is_active" bson:"is_active"`
 	SampleCollectionMethod []string `json:"sample_collection_method" bson:"sample_collection_method"`
-	CreatedAt              uint64   `json:"created_at" bson:"created_at"`
-	LastUpdatedAt          uint64   `json:"last_updated_at" bson:"last_updated_at"`
-}
-
-type LabHealthPackage struct {
-	*LabTest
-	Tests []string `json:"tests"` // tests ID when saving to db/test names when retrieving from db.
+	// Tests is an array of tests ID when saving to db/test names when
+	// retrieving from db. This will be non-empty for test packages.
+	Tests         []string `json:"tests"`
+	CreatedAt     uint64   `json:"created_at" bson:"created_at"`
+	LastUpdatedAt uint64   `json:"last_updated_at" bson:"last_updated_at"`
 }
 
 type ResultStatus string
@@ -244,28 +243,35 @@ type Faqs struct {
 }
 
 type OrderTest struct {
-	TestID  string  `json:"test_id"` // test ids, can be packages
-	Amount  float64 `json:"amount"`
-	LabName string  `json:"lab_name"`
+	LabID    string  `json:"lab_id"`
+	LabName  string  `json:"lab_name"`
+	TestID   string  `json:"test_id"` // test ids, can be packages
+	TestName string  `json:"test_name"`
+	Amount   float64 `json:"amount"`
 }
 
 type Order struct {
-	ID           string       `json:"id"`
+	ID string `json:"id"`
+	OrderInfo
+	Timestamp int64 `json:"timestamp"`
+}
+
+type OrderStatus string
+
+const (
+	OrderStatusPendingPayment OrderStatus = "Pending Payment"
+	OrderStatusPaid           OrderStatus = "Paid"
+)
+
+type OrderInfo struct {
 	Description  string       `json:"description"`
 	TotalAmount  float64      `json:"total_amount" bson:"total_amount"`
+	Fee          float64      `json:"fee"`
 	Tests        []*OrderTest `json:"tests"`
 	PatientID    string       `json:"patient_id" bson:"patient_id"`
 	SubAccountID string       `json:"sub_account_id" bson:"sub_account_id"`
-	Status       string       `json:"status"` // Pending/Paid
+	Status       OrderStatus  `json:"status"` // Pending/Paid
 	Address      *Address     `json:"patient_address" bson:"patient_address"`
-	Timestamp    int64        `json:"timestamp"`
-}
-
-type CreateOrderRequest struct {
-	Tests          []string `json:"tests"` // test ids, can be packages
-	PatientID      string   `json:"patient_id" bson:"patient_id"`
-	SubAccountID   string   `json:"sub_account_id" bson:"sub_account_id"`
-	PatientAddress *Address `json:"patient_address" bson:"patient_address"`
 }
 
 // BankCard holds information about a bank card.

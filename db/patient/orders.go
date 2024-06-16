@@ -10,8 +10,8 @@ func (m *MongoDB) PatientOrders(email string) ([]*db.Order, error) {
 
 // CreatePatientOrder creates a new order for the patient and returns the
 // orderID and amount after validating the order.
-func (m *MongoDB) CreatePatientOrder(email string, orderReq *db.CreateOrderRequest) (string, float64, error) {
-	return "", 0, nil
+func (m *MongoDB) CreatePatientOrder(email string, orderReq *db.OrderInfo) (string, error) {
+	return "", nil
 }
 
 // UpdatePatientOrder updates the status for a patient order.

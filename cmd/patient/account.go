@@ -28,6 +28,8 @@ func (s *Server) handleCreateAccount(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	// TODO: Validate deviceID
+
 	// Validate password.
 	if !validator.IsPasswordValid(reqBody.Password) {
 		s.badRequest(res, req, validator.PassWordErrorMsg)

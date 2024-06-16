@@ -42,7 +42,7 @@ type Database interface {
 	PatientOrders(email string) ([]*db.Order, error)
 	// CreatePatientOrder creates a new order for the patient and returns the
 	// orderID and amount after validating the order.
-	CreatePatientOrder(email string, orderReq *db.CreateOrderRequest) (string, float64, error)
+	CreatePatientOrder(email string, orderReq *db.OrderInfo) (string, error)
 	// UpdatePatientOrder updates the status for a patient order.
 	UpdatePatientOrder(email string, orderID, status string) error
 	// Notifications returns all the notifications for patient sorted by unread

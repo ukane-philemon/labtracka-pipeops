@@ -68,3 +68,10 @@ type authResponse struct {
 type patientProfile struct {
 	db.PatientInfo
 }
+
+type createOrderRequest struct {
+	Tests          []string    `json:"tests"` // test ids, can be packages
+	PatientID      string      `json:"patient_id" bson:"patient_id"`
+	SubAccountID   string      `json:"sub_account_id" bson:"sub_account_id"`
+	PatientAddress *db.Address `json:"patient_address" bson:"patient_address"`
+}
