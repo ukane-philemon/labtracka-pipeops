@@ -39,7 +39,16 @@ func (s *Server) handleCreateOrder(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	// TODO: Check that the patient_id or sub_account_id exists.
+	patient, err := s.db.PatientInfoWithID(reqBody.PatientID)
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("db.PatientInfoWithID error: %w", err))
+		return
+	}
+
+	if reqBody.SubAccountID != "" && !patient.HasSubAccount(reqBody.SubAccountID) {
+		s.badRequest(res, req, "you cannot create an order for sub account")
+		return
+	}
 
 	order := &db.OrderInfo{
 		PatientID:    reqBody.PatientID,

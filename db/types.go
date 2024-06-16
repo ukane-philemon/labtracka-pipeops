@@ -75,9 +75,19 @@ func (a *Address) Validate() error {
 // Patient is the complete information about a patient, including password
 // information.
 type Patient struct {
-	ID              string `json:"id"`
-	ProfileImageURL string `json:"profile_image" bson:"profile_image"`
+	ID              string   `json:"id"`
+	ProfileImageURL string   `json:"profile_image" bson:"profile_image"`
+	SubAccounts     []string `json:"sub_accounts" bson:"sub_accounts"`
 	PatientInfo
+}
+
+func (p *Patient) HasSubAccount(subAccountID string) bool {
+	for _, subAccID := range p.SubAccounts {
+		if subAccID == subAccID {
+			return true
+		}
+	}
+	return false
 }
 
 // CreateAccountRequest is a struct used to pass around argument for patient's
