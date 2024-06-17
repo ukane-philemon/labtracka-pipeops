@@ -81,6 +81,31 @@ func (m *MongoDB) LoginPatient(loginReq *db.LoginRequest) (*db.Patient, error) {
 // ResetPassword reset the password of an existing patient. Returns an
 // ErrorInvalidRequest if the email is not tied to an existing patient.
 func (m *MongoDB) ResetPassword(email, password string) error {
+	var patient *dbPatient
+	accountsColl := m.patient.Collection(accountCollection)
+	opts := options.FindOne().SetProjection(bson.M{dbIDKey: 1, passwordKey: 1})
+	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: email}, opts).Decode(&patient)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return fmt.Errorf("%w: incorrect email or password", db.ErrorInvalidRequest)
+		}
+		return err
+	}
+
+	// Check for password reuse.
+	if err := bcrypt.CompareHashAndPassword([]byte(patient.Password), []byte(password)); err == nil {
+		return fmt.Errorf("%w: cannot reuse password", db.ErrorInvalidRequest)
+	}
+
+	res, err := accountsColl.UpdateOne(m.ctx, patient.ID, bson.M{passwordKey: password}, options.Update().SetUpsert(false))
+	if err != nil {
+		return fmt.Errorf("accountsColl.UpdateOne error: %w", err)
+	}
+
+	if res.ModifiedCount == 0 {
+		return errors.New("patient password was not reset")
+	}
+
 	return nil
 }
 
@@ -125,7 +150,7 @@ func (m *MongoDB) MarkNotificationsAsRead(email string, noteIDs ...string) error
 	notificationsCollection := m.patient.Collection(notificationsCollection)
 	for _, noteID := range noteIDs {
 		filter := bson.M{patientIDKey: patientID, idKey: noteID}
-		res, err := notificationsCollection.UpdateOne(m.ctx, filter, bson.M{readKey: true}, options.Update().SetUpsert(false))
+		res, err := notificationsCollection.UpdateOne(m.ctx, filter, bson.M{setAction: bson.M{readKey: true}}, options.Update().SetUpsert(false))
 		if err != nil {
 			return err
 		}

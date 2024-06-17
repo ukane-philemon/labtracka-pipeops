@@ -35,6 +35,7 @@ const (
 	statusKey       = "status"
 	otherAddressKey = "other_address"
 	patientIDKey    = "patient_id"
+	passwordKey     = "password"
 
 	// Special actions
 	greaterThan = "$gt"
