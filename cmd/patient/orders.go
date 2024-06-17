@@ -74,7 +74,7 @@ func (s *Server) handleCreateOrder(res http.ResponseWriter, req *http.Request) {
 			return
 		}
 
-		if !testInfo.IsActive {
+		if !testInfo.IsDisabled {
 			s.badRequest(res, req, fmt.Sprintf("%s has been disabled", testInfo.Name))
 			return
 		}

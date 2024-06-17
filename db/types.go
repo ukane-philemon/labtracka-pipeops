@@ -183,13 +183,13 @@ type LabTest struct {
 	Description            string   `json:"description"`
 	Gender                 string   `json:"gender"`
 	Categories             []string `json:"categories"`
-	IsActive               bool     `json:"is_active" bson:"is_active"`
+	IsDisabled             bool     `json:"is_disabled" bson:"is_disabled"`
 	SampleCollectionMethod []string `json:"sample_collection_method" bson:"sample_collection_method"`
 	// Tests is an array of tests ID when saving to db/test names when
 	// retrieving from db. This will be non-empty for test packages.
 	Tests         []string `json:"tests"`
-	CreatedAt     uint64   `json:"created_at" bson:"created_at"`
-	LastUpdatedAt uint64   `json:"last_updated_at" bson:"last_updated_at"`
+	CreatedAt     int64    `json:"created_at" bson:"created_at"`
+	LastUpdatedAt int64    `json:"last_updated_at" bson:"last_updated_at"`
 }
 
 type ResultStatus string
@@ -207,16 +207,16 @@ type LabResult struct {
 	Status              ResultStatus `json:"status"`
 	Data                []string     `json:"data"` // base64 encoded file or a file url
 	TurnAroundInSeconds int64        `json:"turn_around_in_seconds"`
-	CreatedAt           uint64       `json:"created_at" bson:"created_at"`
-	LastUpdatedAt       uint64       `json:"last_updated_at" bson:"last_updated_at"`
+	CreatedAt           int64        `json:"created_at" bson:"created_at"`
+	LastUpdatedAt       int64        `json:"last_updated_at" bson:"last_updated_at"`
 }
 
 type TestCategory struct {
 	ID            string `json:"id"`
 	Name          string `json:"name"`
 	IsActive      bool   `json:"is_active" bson:"is_active"`
-	CreatedAt     uint64 `json:"created_at" bson:"created_at"`
-	LastUpdatedAt uint64 `json:"last_updated_at" bson:"last_updated_at"`
+	CreatedAt     int64  `json:"created_at" bson:"created_at"`
+	LastUpdatedAt int64  `json:"last_updated_at" bson:"last_updated_at"`
 }
 
 type NotificationType string
@@ -244,8 +244,9 @@ type Faq struct {
 }
 
 type HelpLink struct {
-	Title string `json:"title"`
-	Link  string `json:"link"`
+	Title   string `json:"title"`
+	Link    string `json:"link"`
+	IsVideo bool   `json:"is_video"`
 }
 
 type Faqs struct {
