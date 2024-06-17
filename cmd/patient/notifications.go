@@ -27,7 +27,7 @@ func (s *Server) handleGetNotifications(res http.ResponseWriter, req *http.Reque
 	s.sendSuccessResponseWithData(res, req, notifications)
 }
 
-// handleMarkNotificationAsRead handles the "POST /mark-notifications-as-read"
+// handleMarkNotificationAsRead handles the "PATCH /mark-notifications-as-read"
 // endpoint and marks the notifications provided as query params noteID,
 // multiple IDs must be supported by a coma ",".
 func (s *Server) handleMarkNotificationAsRead(res http.ResponseWriter, req *http.Request) {

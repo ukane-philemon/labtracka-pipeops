@@ -201,13 +201,14 @@ const (
 )
 
 type LabResult struct {
-	ID            string       `json:"id"`
-	TestName      string       `json:"test_name" bson:"test_name"`
-	LabName       string       `json:"lab_name" bson:"lab_name"`
-	Status        ResultStatus `json:"status"`
-	Data          string       `json:"data"` // base64 encoded or a file url
-	CreatedAt     uint64       `json:"created_at" bson:"created_at"`
-	LastUpdatedAt uint64       `json:"last_updated_at" bson:"last_updated_at"`
+	ID                  string       `json:"id"` // order id
+	TestName            string       `json:"test_name" bson:"test_name"`
+	LabName             string       `json:"lab_name" bson:"lab_name"`
+	Status              ResultStatus `json:"status"`
+	Data                []string     `json:"data"` // base64 encoded file or a file url
+	TurnAroundInSeconds int64        `json:"turn_around_in_seconds"`
+	CreatedAt           uint64       `json:"created_at" bson:"created_at"`
+	LastUpdatedAt       uint64       `json:"last_updated_at" bson:"last_updated_at"`
 }
 
 type TestCategory struct {
