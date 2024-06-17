@@ -109,3 +109,18 @@ func (m *MongoDB) AddNewAddress(email string, address *db.Address) ([]*db.Addres
 
 	return patient.OtherAddress, nil
 }
+
+// SaveProfileImage updates the profile link for a patient.
+func (m *MongoDB) SaveProfileImage(email string, profileURL string) error {
+	accountsColl := m.patient.Collection(accountCollection)
+	res, err := accountsColl.UpdateOne(m.ctx, bson.M{emailKey: email}, bson.M{setAction: bson.M{profileImageKey: profileURL}})
+	if err != nil {
+		return fmt.Errorf("accountsColl.UpdateOne error: %w", err)
+	}
+
+	if res.ModifiedCount == 0 {
+		return errors.New("patient profile image was not updated")
+	}
+
+	return nil
+}

@@ -51,6 +51,8 @@ type Database interface {
 	CreatePatientOrder(email string, orderReq *db.OrderInfo) (string, error)
 	// UpdatePatientOrder updates the status for a patient order.
 	UpdatePatientOrder(email string, orderID, status string) error
+	// SaveProfileImage updates the profile link for a patient.
+	SaveProfileImage(patientID string, profileURL string) error
 	// Notifications returns all the notifications for patient sorted by unread
 	// first.
 	Notifications(email string) ([]*db.Notification, error)
