@@ -11,6 +11,9 @@ type Database interface {
 	// the database. Returns an ErrorInvalidRequest if user email is already
 	// tied to another patient.
 	CreateAccount(req *db.CreateAccountRequest) error
+	// PatientID returns the database ID for the patient with the provided
+	// email.
+	PatientID(email string) (string, error)
 	// PatientInfo returns the information of the patient with the provided
 	// email.
 	PatientInfo(email string) (*db.Patient, error)

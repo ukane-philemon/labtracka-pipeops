@@ -47,6 +47,15 @@ func (m *MongoDB) CreateAccount(req *db.CreateAccountRequest) error {
 	return nil
 }
 
+// PatientID returns the database ID for the patient with the provided email.
+func (m *MongoDB) PatientID(email string) (string, error) {
+	patientID, err := m.patientID(email)
+	if err != nil {
+		return "", err
+	}
+	return patientID, nil
+}
+
 // PatientInfo returns the information of the patient with the provided email.
 func (m *MongoDB) PatientInfo(email string) (*db.Patient, error) {
 	return nil, nil
