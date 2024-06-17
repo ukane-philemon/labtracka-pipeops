@@ -113,6 +113,40 @@ func (m *MongoDB) ResetPassword(email, password string) error {
 // ErrorInvalidRequest if email is not tied to an existing patient or
 // current password is incorrect.
 func (m *MongoDB) ChangePassword(email, currentPassword, newPassword string) error {
+	if validator.AnyValueEmpty(currentPassword, newPassword) {
+		return fmt.Errorf("%w: missing required arguments", db.ErrorInvalidRequest)
+	}
+
+	// Check for password reuse.
+	if currentPassword == newPassword {
+		return fmt.Errorf("%w: cannot reuse password", db.ErrorInvalidRequest)
+	}
+
+	var patient *dbPatient
+	accountsColl := m.patient.Collection(accountCollection)
+	opts := options.FindOne().SetProjection(bson.M{dbIDKey: 1, passwordKey: 1})
+	err := accountsColl.FindOne(m.ctx, bson.M{emailKey: email}, opts).Decode(&patient)
+	if err != nil {
+		if errors.Is(err, mongo.ErrNoDocuments) {
+			return fmt.Errorf("%w: incorrect email or password", db.ErrorInvalidRequest)
+		}
+		return err
+	}
+
+	// Check for password match.
+	if err := bcrypt.CompareHashAndPassword([]byte(patient.Password), []byte(currentPassword)); err != nil {
+		return fmt.Errorf("%w: incorrect password", db.ErrorInvalidRequest)
+	}
+
+	res, err := accountsColl.UpdateOne(m.ctx, patient.ID, bson.M{passwordKey: newPassword}, options.Update().SetUpsert(false))
+	if err != nil {
+		return fmt.Errorf("accountsColl.UpdateOne error: %w", err)
+	}
+
+	if res.ModifiedCount == 0 {
+		return errors.New("patient password was not changed")
+	}
+
 	return nil
 }
 
