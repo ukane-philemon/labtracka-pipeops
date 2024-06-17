@@ -19,7 +19,10 @@ require (
 require github.com/cristalhq/jwt v1.2.0
 
 require (
+	github.com/creasty/defaults v1.5.1 // indirect
 	github.com/golang/snappy v0.0.1 // indirect
+	github.com/google/uuid v1.2.0 // indirect
+	github.com/gorilla/schema v1.2.0 // indirect
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/montanaflynn/stats v0.0.0-20171201202039-1bf9dbcd8cbe // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
@@ -31,6 +34,7 @@ require (
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cloudinary/cloudinary-go/v2 v2.7.0
 	github.com/go-chi/cors v1.2.1
 	go.mongodb.org/mongo-driver v1.14.0
 )
