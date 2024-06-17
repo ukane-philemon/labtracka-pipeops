@@ -1,17 +1,56 @@
 package admin
 
-import "github.com/ukane-philemon/labtracka-api/db"
+import (
+	"time"
+
+	"github.com/ukane-philemon/labtracka-api/db"
+)
 
 /**** Patient ****/
 
 func (m *MongoDB) PatientLabStats(patientID string) (db.PatientStats, error) {
-	return db.PatientStats{}, nil
+	return db.PatientStats{
+		TotalNumberOfLabsVisited:     5,
+		TotalNumberOfCompletedOrders: 20,
+	}, nil
 }
 
 // Results returns all results for the patient with the specified email
 // address.
 func (m *MongoDB) Results(patientID string) ([]*db.LabResult, error) {
-	return nil, nil
+	nowUnix := time.Now().Unix()
+	return []*db.LabResult{
+		{
+			ID:                  patientID,
+			TestName:            "Malaria",
+			LabName:             "Test Lab",
+			Status:              db.ResultStatusPending,
+			Data:                []string{},
+			TurnAroundInSeconds: 0,
+			CreatedAt:           uint64(nowUnix),
+			LastUpdatedAt:       uint64(nowUnix),
+		},
+		{
+			ID:                  patientID,
+			TestName:            "Typhoid",
+			LabName:             "Test Lab",
+			Status:              db.ResultStatusInProgress,
+			Data:                []string{},
+			TurnAroundInSeconds: 0,
+			CreatedAt:           uint64(nowUnix),
+			LastUpdatedAt:       uint64(nowUnix),
+		},
+		{
+			ID:                  patientID,
+			TestName:            "Pregnancy",
+			LabName:             "Test Lab",
+			Status:              db.ResultStatusCompleted,
+			Data:                []string{"random base64 file or file url"},
+			TurnAroundInSeconds: 60 * 60 * 4,
+			CreatedAt:           uint64(nowUnix),
+			LastUpdatedAt:       uint64(nowUnix),
+		},
+	}, nil
 }
 
 /**** Labs ****/
