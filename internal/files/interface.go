@@ -7,7 +7,7 @@ import (
 
 type FileUploader interface {
 	// UploadFile sends the file to the file database.
-	UploadFile(ctx context.Context, fileName string, file io.Reader) (string, error)
+	UploadFile(ctx context.Context, dir, fileName string, file io.Reader) (string, error)
 }
 
 func IsFileTypeSupported(fileType string) bool {

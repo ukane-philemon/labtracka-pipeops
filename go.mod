@@ -34,6 +34,7 @@ require (
 
 require (
 	github.com/cespare/xxhash/v2 v2.1.2 // indirect
+	github.com/cloudinary/cloudinary-go v1.7.0
 	github.com/cloudinary/cloudinary-go/v2 v2.7.0
 	github.com/go-chi/cors v1.2.1
 	go.mongodb.org/mongo-driver v1.14.0

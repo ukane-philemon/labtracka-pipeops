@@ -42,28 +42,27 @@ func (s *Server) registerRoutes() http.Handler {
 
 		/**** Profile ****/
 		withAuth.Get("/profile", s.handleGetProfile)
-		withAuth.Post("/profile-image", nil) // TODO:
-		withAuth.Get("/profile-image", nil)  // TODO:
+		withAuth.Post("/profile-image", s.handleProfileImageUpload)
 		withAuth.Post("/sub-account", s.handleAddSubAccount)
 		withAuth.Get("/sub-accounts", s.handleGetSubAccounts)
 		withAuth.Delete("/sub-account", s.handleRemoveSubAccount)
 		withAuth.Post("/add-address", s.handleAddAddress)
 		withAuth.Get("/cards", s.handleGetCards)
 
-		/**** Labs ****/
-		withAuth.Get("/labs", s.handleGetLabs)
-		withAuth.Get("/labs/{labID}/tests", s.handleGetLabTests)
-
 		/**** Orders ****/
 		withAuth.Post("/order", s.handleCreateOrder)
 		withAuth.Get("/orders", s.handleGetOrders)
 
-		/**** Results ****/
-		withAuth.Get("/results", s.handleGetResults)
-
 		/**** Notifications ****/
 		withAuth.Get("/notifications", s.handleGetNotifications)
 		withAuth.Patch("/mark-notifications-as-read", s.handleMarkNotificationAsRead)
+
+		/**** Results ****/
+		withAuth.Get("/results", s.handleGetResults)
+
+		/**** Labs ****/
+		withAuth.Get("/labs", s.handleGetLabs)
+		withAuth.Get("/labs/{labID}/tests", s.handleGetLabTests)
 
 		/**** Miscellaneous ****/
 		withAuth.Get("/faqs", s.handleGetFaqs)

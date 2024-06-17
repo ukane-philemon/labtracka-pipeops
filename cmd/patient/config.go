@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/ukane-philemon/labtracka-api/internal/files"
 	"github.com/ukane-philemon/labtracka-api/internal/validator"
 )
 
@@ -22,6 +23,8 @@ type Config struct {
 	SMTPUsername string
 	SMTPPassword string
 	SMTPFrom     string
+
+	Uploader files.FileUploader
 }
 
 // Validate checks that the config values are valid.

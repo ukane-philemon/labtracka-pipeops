@@ -26,7 +26,7 @@ func NewCloudinaryClient() (*CloudinaryClient, error) {
 }
 
 // Upload sends the file to the file database.
-func (cc *CloudinaryClient) UploadFile(ctx context.Context, fileName string, file io.Reader) (string, error) {
+func (cc *CloudinaryClient) UploadFile(ctx context.Context, dir, fileName string, file io.Reader) (string, error) {
 	// Upload the image. Set the asset's public ID and allow overwriting the
 	// asset with new versions.
 	yes := true
@@ -35,7 +35,7 @@ func (cc *CloudinaryClient) UploadFile(ctx context.Context, fileName string, fil
 		UseFilename:                    &yes,
 		UniqueFilename:                 &yes,
 		UseFilenameAsDisplayName:       &yes,
-		AssetFolder:                    "/files",
+		Folder:                         dir,
 		UseAssetFolderAsPublicIDPrefix: &yes,
 		Overwrite:                      api.Bool(true),
 		Transformation:                 "",

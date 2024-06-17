@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/ukane-philemon/labtracka-api/db"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 /**** Patient ****/
@@ -57,7 +58,34 @@ func (m *MongoDB) Results(patientID string) ([]*db.LabResult, error) {
 
 // Labs returns a list of available labs.
 func (m *MongoDB) Labs() ([]*db.BasicLabInfo, error) {
-	return nil, nil
+	return []*db.BasicLabInfo{
+		{
+			ID:      primitive.NewObjectID().Hex(),
+			Name:    "Test Lab",
+			LogoURL: "full path to logo url",
+			Address: db.Address{
+				Coordinates: "",
+				HouseNumber: "29",
+				StreetName:  "Test street, musa close",
+				City:        "Port Harcourt",
+				Country:     "Nigeria",
+			},
+			Featured: true,
+		},
+		{
+			ID:      primitive.NewObjectID().Hex(),
+			Name:    "Zion Test Lab",
+			LogoURL: "full path to logo url",
+			Address: db.Address{
+				Coordinates: "",
+				HouseNumber: "12",
+				StreetName:  "Dynwell street",
+				City:        "Port Harcourt",
+				Country:     "Nigeria",
+			},
+			Featured: false,
+		},
+	}, nil
 }
 
 // LabTests returns a list of supported single lab tests and test packages

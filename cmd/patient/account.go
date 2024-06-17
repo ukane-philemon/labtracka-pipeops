@@ -1,15 +1,19 @@
 package patient
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"net/http"
 	"strings"
 
 	"github.com/ukane-philemon/labtracka-api/db"
+	"github.com/ukane-philemon/labtracka-api/internal/files"
 	"github.com/ukane-philemon/labtracka-api/internal/request"
 	"github.com/ukane-philemon/labtracka-api/internal/validator"
 )
+
+var maxFileUploadSize = 2 * 1024 // 2MB
 
 // handleCreateAccount handles the "POST /create-account" endpoint and creates
 // an account or a new patient.
@@ -92,6 +96,65 @@ func (s *Server) handleGetProfile(res http.ResponseWriter, req *http.Request) {
 
 func trimErrorInvalidRequest(err error) string {
 	return strings.TrimPrefix(err.Error(), db.ErrorInvalidRequest.Error()+": ")
+}
+
+// handleProfileImageUpload handles the "POST /profile-image" endpoint and
+// uploads or updates a patient's profile image.
+func (s *Server) handleProfileImageUpload(res http.ResponseWriter, req *http.Request) {
+	authID := s.reqAuthID(req)
+	if authID == "" {
+		s.authenticationRequired(res, req)
+		return
+	}
+
+	err := req.ParseMultipartForm(int64(maxFileUploadSize))
+	if err != nil {
+		s.badRequest(res, req, "failed to parse file (max file size 2MB)")
+		return
+	}
+
+	const profileImageUploadKey = "profile-image"
+	f, _, err := req.FormFile(profileImageUploadKey)
+	if err != nil {
+		s.badRequest(res, req, "failed to parse file")
+		return
+	}
+	defer f.Close()
+
+	var buf bytes.Buffer
+	_, err = buf.ReadFrom(f)
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("buf.ReadFrom error: %w", err))
+		return
+	}
+
+	fileType := http.DetectContentType(buf.Bytes())
+	if !files.IsSupportedImageFile(fileType) {
+		s.badRequest(res, req, "only image files are supported")
+		return
+	}
+
+	patientID, err := s.db.PatientID(authID)
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("db.PatientID error: %w", err))
+		return
+	}
+
+	fileURL, err := s.cfg.Uploader.UploadFile(s.ctx, patientID, "profile-image", bytes.NewReader(buf.Bytes()))
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("Uploader.UploadFile error: %w", err))
+		return
+	}
+
+	err = s.db.SaveProfileImage(authID, fileURL)
+	if err != nil {
+		s.serverError(res, req, fmt.Errorf("db.SaveProfileImage error: %w", err))
+		return
+	}
+
+	s.sendSuccessResponseWithData(res, req, map[string]string{
+		"profile_url": fileURL,
+	})
 }
 
 /*** Sub Accounts ***/

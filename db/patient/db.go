@@ -36,6 +36,7 @@ const (
 	otherAddressKey = "other_address"
 	patientIDKey    = "patient_id"
 	passwordKey     = "password"
+	profileImageKey = "profile_image"
 
 	// Special actions
 	greaterThan = "$gt"
