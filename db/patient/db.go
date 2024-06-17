@@ -23,6 +23,7 @@ const (
 	loginRecordCollection   = "login-records"
 	ordersCollection        = "orders"
 	notificationsCollection = "notifications"
+	subAccountsCollection   = "sub-accounts"
 
 	// Fields
 
@@ -37,6 +38,7 @@ const (
 	patientIDKey    = "patient_id"
 	passwordKey     = "password"
 	profileImageKey = "profile_image"
+	subAccountsKey  = "sub_accounts"
 
 	// Special actions
 	greaterThan = "$gt"

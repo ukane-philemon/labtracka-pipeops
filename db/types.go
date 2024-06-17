@@ -113,6 +113,7 @@ type AdminStats struct {
 type SubAccountInfo struct {
 	ID         string `json:"id"`
 	SubAccount `bson:"inline"`
+	Timestamp  int64 `json:"timestamp"`
 }
 
 type SubAccount struct {
