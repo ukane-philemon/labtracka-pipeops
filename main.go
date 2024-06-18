@@ -13,13 +13,14 @@ import (
 	patientapi "github.com/ukane-philemon/labtracka-api/cmd/patient"
 	admindb "github.com/ukane-philemon/labtracka-api/db/admin"
 	patientdb "github.com/ukane-philemon/labtracka-api/db/patient"
+	"github.com/ukane-philemon/labtracka-api/internal/files"
 )
 
 var wg sync.WaitGroup
 
 func main() {
-	var connectionURL string
-	flag.StringVar(&connectionURL, "dbConnectionURL", "", "MongoDB Database connection URL")
+	const dbURLKey = "DB_URL"
+	connectionURL := os.Getenv(dbURLKey)
 	var devMode bool
 	flag.BoolVar(&devMode, "dev", true, "Specify development environment")
 	var adminServer bool
@@ -44,12 +45,17 @@ func main() {
 		logErrorAndExit(err)
 	}
 
+	cloud, err := files.NewCloudinaryClient()
+	if err != nil {
+		logErrorAndExit(err)
+	}
+
 	wg.Add(1)
 	go func() {
 		logger.Info("Attempting to start patient server...")
 		startPatientServer(patientDB, adminDB, &patientapi.Config{
 			DevMode:      devMode,
-			ServerHost:   "localhost",
+			ServerHost:   "0.0.0.0",
 			ServerPort:   "8080",
 			ServerEmail:  "ukanephilemon@gmail.com",
 			SMTPHost:     "smtp-relay.brevo.com",
@@ -57,6 +63,7 @@ func main() {
 			SMTPUsername: "labtracka@gmail.com",
 			SMTPPassword: "", // Add when needed
 			SMTPFrom:     "labtracka@gmail.com",
+			Uploader:     cloud,
 		})
 	}()
 
@@ -66,7 +73,7 @@ func main() {
 			logger.Info("Attempting to start admin server...")
 			startAdminServer(patientDB, adminDB, &adminapi.Config{
 				DevMode:      devMode,
-				ServerHost:   "localhost",
+				ServerHost:   "0.0.0.0",
 				ServerPort:   "8081",
 				ServerEmail:  "ukanephilemon@gmail.com",
 				SMTPHost:     "smtp-relay.brevo.com",

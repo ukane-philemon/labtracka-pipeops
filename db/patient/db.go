@@ -61,7 +61,7 @@ type MongoDB struct {
 // New creates and connects a new *MongoDB instance.
 func New(ctx context.Context, devMode bool, logger *slog.Logger, connectionURL string) (*MongoDB, error) {
 	if logger == nil || connectionURL == "" {
-		return nil, errors.New("missing required patient server arguments")
+		return nil, errors.New("missing required patient db arguments")
 	}
 
 	serverAPI := options.ServerAPI(options.ServerAPIVersion1)
